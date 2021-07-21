@@ -136,7 +136,7 @@ function system.user() {
       *[!0-9]*)
         # Is a string, so we need to check if the group even exists
         # And if it doesn't, that's, well, bad? Yes, that's bad.
-        _gid=$(getent group $gid)
+        _gid=$(getent group $gid | awk -F ':' '{print $3}')
         ;;
       *)
         # is a number
