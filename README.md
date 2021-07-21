@@ -5,26 +5,26 @@ A [babushka][1] like clone, written in bash.
 Clone this repo to the location of your choice, and add `babashka/bin` to your path.
 
 ```bash
-git clone https://github.com/richo/babashka
+git clone https://github.com/aurynn/babashka
 echo "export PATH=$PWD/babashka/bin:\${PATH}" >>.bashrc
 ```
 
 or if you don't have git
 
 ```bash
-curl https://raw.githubusercontent.com/richo/babashka/master/bootstrap.sh | sh /dev/stdin
+curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin
 ```
 
 Or if you've done this before and you want your deps too:
 
 ```bash
-curl https://raw.githubusercontent.com/richo/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username
+curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username
 ```
 
 Or if for some reason you felt compelled to name your deps strangely:
 
 ```bash
-curl https://raw.githubusercontent.com/richo/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username -r strangely_named_repo
+curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username -r strangely_named_repo
 ```
 
 ## Organising deps

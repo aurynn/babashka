@@ -1,4 +1,4 @@
-function install_package() {
+function system.package() {
   _package_name=$1; shift
   _platform=`uname -s`
   # -a == apt

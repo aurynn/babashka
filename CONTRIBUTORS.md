@@ -1,0 +1,3 @@
+- @richo
+  - All initial work
+- @aurynn
