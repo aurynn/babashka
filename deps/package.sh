@@ -12,7 +12,7 @@ function system.package() {
     esac
   done
   unset OPTIND
-
+  __babashka_log "system.package $_package_name"
   case "`uname -s`" in
     Linux)
      # TODO things other than debian derivatives
@@ -34,4 +34,5 @@ function system.package() {
      }
      ;;
   esac
+  process
 }
