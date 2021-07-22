@@ -11,6 +11,9 @@ function system.directory() {
         mode=$(echo $OPTARG | xargs);;
     esac
   done
+  # Reset the option parsing
+  unset OPTIND
+  unset OPTARG
   __babashka_log "system.directory $_directory"
   # TODO: Support not-Linux?
   function is_met() {
@@ -53,7 +56,9 @@ function system.group() {
         gid=$(echo $OPTARG | xargs);;
     esac
   done
-
+  # Reset the option parsing
+  unset OPTIND
+  unset OPTARG
   function is_met() {
     if ! getent group $_group_name; then
       return 1
@@ -100,6 +105,9 @@ function system.user() {
         is_system=true
     esac
   done
+  # Reset the option parsing
+  unset OPTIND
+  unset OPTARG
   __babashka_log "system.user $_user_name"
   if [[ is_system == true ]]; then
     unset $homedir
