@@ -19,7 +19,7 @@ function system.directory() {
     if [[ $group != "" ]] && [[ `stat -c '%G' ${_directory}` != $group ]]; then
       return 1
     fi
-    if [[ $user != "" ]] && [[ `stat -c '%U' ${_directory}` != $owner ]]; then
+    if [[ $owner != "" ]] && [[ `stat -c '%U' ${_directory}` != $owner ]]; then
       return 1
     fi
     if [[ $mode != "" ]]; then
