@@ -66,7 +66,7 @@ function system.group() {
     if getent group $_group_name; then
       $__babashka_sudo groupmod -g $gid $_group_name
     else
-      $__babashka_sudo addgroup $_group_name ${gid:+"-g $gid"}
+      $__babashka_sudo addgroup $_group_name ${gid:+-g $gid}
     fi
   }
 }
@@ -147,18 +147,18 @@ function system.user() {
     if getent passwd ${_user_name} ; then
       # User already exists, so we're modifying the user
       $__babashka_sudo usermod \
-        ${_gid:+"-g $_gid"} \
-        ${uid:+"-u $uid"} \
-        ${shell:+"-s $shell"} \
-        ${homedir:+"-d $homedir"} \
+        ${_gid:+-g $_gid} \
+        ${uid:+-u $uid} \
+        ${shell:+-s $shell} \
+        ${homedir:+-d $homedir} \
         ${_user_name}
     else
       # User doesn't exist, create it
       $__babashka_sudo useradd \
-        ${_gid:+"-g $_gid"} \
-        ${uid:+"-u $uid"} \
-        ${homedir:+"-d $homedir"} \
-        ${shell:+"-s $shell"} \
+        ${_gid:+-g $_gid} \
+        ${uid:+-u $uid} \
+        ${homedir:+-d $homedir} \
+        ${shell:+-s $shell} \
         ${_user_name}
     fi
   }
