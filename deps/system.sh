@@ -123,7 +123,7 @@ function system.user() {
       [[ $(getent passwd ${_user_name} | awk -F ':' '{print $3}') == $uid ]] || return 1
     fi
     if [[ $shell != "" ]]; then
-      [[ $(getent passwd ${_user_name} | awk -F ':' '{print $5}') == $shell ]] || return 1
+      [[ $(getent passwd ${_user_name} | awk -F ':' '{print $7}') == $shell ]] || return 1
     fi
     if [[ $homedir != "" ]]; then
       [[ $(getent passwd ${_user_name} | awk -F ':' '{print $6}') == $homedir ]] || return 1
