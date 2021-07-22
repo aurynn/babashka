@@ -1,5 +1,6 @@
 function system.directory() {
-  _directory=$1; shift
+  _directory=$1;
+  shift
   while getopts "o:g:m:" opt; do
     case "$opt" in
       o)
@@ -10,7 +11,7 @@ function system.directory() {
         mode=$(echo $OPTARG | xargs);;
     esac
   done
-
+  __babashka_log "system.directory $_directory"
   # TODO: Support not-Linux?
   function is_met() {
     if ! [[ -d $_directory ]]; then
@@ -38,11 +39,13 @@ function system.directory() {
     [[ $owner != "" ]] && $__babashka_sudo chown $owner $_directory
     [[ $group != "" ]] && $__babashka_sudo chgrp $group $_directory
   }
+  process
 }
 
 function system.group() {
   _group_name=$1; shift
 
+  __babashka_log "system.group $_group_name"
   while getopts "g:" opt; do
     case "$opt" in
       # echoing through xargs trims whitespace
@@ -69,6 +72,7 @@ function system.group() {
       $__babashka_sudo addgroup $_group_name ${gid:+-g $gid}
     fi
   }
+  process
 }
 
 function system.user() {
@@ -96,6 +100,7 @@ function system.user() {
         is_system=true
     esac
   done
+  __babashka_log "system.user $_user_name"
   if [[ is_system == true ]]; then
     unset $homedir
   fi
@@ -162,4 +167,5 @@ function system.user() {
         ${_user_name}
     fi
   }
+  process
 }
