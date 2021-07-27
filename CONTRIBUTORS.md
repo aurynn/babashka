@@ -1,3 +1,4 @@
 - @richo
   - All initial work
 - @aurynn
+  - Everything else so far

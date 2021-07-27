@@ -81,8 +81,8 @@ function system.group() {
 }
 
 function system.user() {
-  _user_name=$1; shift
 
+  _user_name=$1; shift
   # g: gid or group name
   # u: uid
   # s: system
@@ -91,7 +91,7 @@ function system.user() {
   # TODO: Use `getopt` instead to allow more betterer parsing?
   #       Though getopt is often confusing
   #       oh well
-  while getopts "g:u:p:l:h:s" opt; do
+  while getopts "g:u:l:h:s" opt; do
     case "$opt" in
       g)
         gid=$(echo $OPTARG | xargs);;
@@ -177,3 +177,4 @@ function system.user() {
   }
   process
 }
+

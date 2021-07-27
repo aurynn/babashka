@@ -9,35 +9,38 @@ git clone https://github.com/aurynn/babashka
 echo "export PATH=$PWD/babashka/bin:\${PATH}" >>.bashrc
 ```
 
-or if you don't have git
+or, to install system-wide,
 
 ```bash
-curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin
+cd /opt
+sudo git clone https://github.com/aurynn/babashka
+sudo mkdir /etc/babashka
+cd /etc/babashka
+sudo ln -s /opt/babashka/dependencies .
+sudo ln -s /opt/babashka/helpers .
+sudo ln -s /opt/babashka/bin/babashka /usr/bin/babashka
 ```
 
-Or if you've done this before and you want your deps too:
 
-```bash
-curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username
-```
-
-Or if for some reason you felt compelled to name your deps strangely:
-
-```bash
-curl https://raw.githubusercontent.com/aurynn/babashka/master/bootstrap.sh | sh /dev/stdin -u your_github_username -r strangely_named_repo
-```
-
-## Organising deps
+## Organising dependencies
 
 `babashka` looks for dependencies by searching the `./babashka/`, `./babashka/dependencies/` and `/etc/babashka/dependencies` folders for files ending in `.bash` or `.sh`.
 
-Project-specific deps are conventionally kept in `./babashka/` and global deps are conventionally kept in `/etc/babashka/dependencies`.
+Project-specific dependencies are conventionally kept in `./babashka/` and global dependencies are conventionally kept in `/etc/babashka/dependencies`.
 
-For example, `~/projects/myapp/deps/deploy.sh` might contain deployment scripts for an app called `myapp`, while `/etc/babashka/dependencies/packages.sh` might contain deps which install packages you commonly need on new systems.
+For example, `~/projects/myapp/babashka/deploy.sh` might contain deployment scripts for an app called `myapp`, while `/etc/babashka/dependencies/packages.sh` might contain dependencies which install packages you commonly need on new systems.
 
-## Writing deps
+## Custom dependency directories
 
-Write deps with a similar form to their babushka counterparts:
+`babashka` takes an argument, `-d`, to add another search path for dependencies.
+
+## Templating
+
+`babashka` comes with a built-in, `system.file.template`, which takes advantage of [Mo](https://github.com/tests-always-included/mo). This is an optional dependency.
+
+## Writing dependencies
+
+Write dependencies with a similar form to their babushka counterparts:
 
 ```bash
 

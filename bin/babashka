@@ -12,7 +12,7 @@ __babashka_usage() {
     exit 1
 }
 
-while getopts "vfxs" opt; do
+while getopts "vfxsd:" opt; do
     case $opt in
         x)
             __babashka_trace=yes
@@ -22,6 +22,10 @@ while getopts "vfxs" opt; do
             ;;
         f)
             __babushka_force="yes"
+            ;;
+        d)
+            # Set a custom directory to also source in
+            __babashka_directory=$(echo $OPTARG | xargs)
             ;;
         v)
             __babashka_output_stream="/dev/stderr"
@@ -101,18 +105,24 @@ function __babashka_invoke() {
 function __babashka_load_deps() {
     # Rename directories to be a bit more clear what they're for
     # Include a system-level Babashka repository for common packages and stuff
-    for path in babashka/ babashka/dependencies/ /etc/babashka/dependencies ; do
+    for path in babashka/ babashka/dependencies/ /etc/babashka/dependencies /etc/babashka/helpers; do
         if [ -d $path ]; then
             __babashka_load_deps_from_path "$path"
         fi
     done
+    # Have we requested that a specific directory be added? Then we load it
+    if [[ $__babashka_directory != "" ]]; then
+        __babashka_find_deps_from_path "$_babashka_directory"
+    fi
 }
 
 # $1 - path to search over
 # [$2] - pattern to match for deps
 function __babashka_find_deps_from_path() {
-    find "$1" -type f -iname "*.${2:-sh}"
+    # Use -L to follow links
+    find -L "$1" -type f -iname "*.${2:-sh}"
                       # TODO
+                      # ... todo what?
 }
 
 # $1 - path to load deps from
