@@ -105,7 +105,7 @@ function __babashka_invoke() {
 function __babashka_load_deps() {
     # Rename directories to be a bit more clear what they're for
     # Include a system-level Babashka repository for common packages and stuff
-    for path in babashka/ babashka/dependencies/ /etc/babashka/dependencies /etc/babashka/helpers "$__babashka_directory"; do
+    for path in babashka/ babashka/dependencies/ /etc/babashka/dependencies /etc/babashka/helpers ${__babashka_directory:+$__babashka_directory}; do
         if [ -d $path ]; then
             __babashka_load_deps_from_path "$path"
         fi
