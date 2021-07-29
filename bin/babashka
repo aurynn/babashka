@@ -112,7 +112,7 @@ function __babashka_load_deps() {
     done
     # Have we requested that a specific directory be added? Then we load it
     if [[ $__babashka_directory != "" ]]; then
-        __babashka_find_deps_from_path "$_babashka_directory"
+        __babashka_find_deps_from_path "$__babashka_directory"
     fi
 }
 
