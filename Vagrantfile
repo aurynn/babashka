@@ -21,11 +21,11 @@ Vagrant.configure("2") do |config|
   pushd /etc/babashka
   sudo ln -s /vagrant/dependencies .
   sudo ln -s /vagrant/helpers .
+  popd
   SHELL
 
   config.vm.provision "reload", run: :once
 
   # we can run the tests now, if we like
-
 
 end

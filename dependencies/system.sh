@@ -170,7 +170,7 @@ function system.user() {
       $__babashka_sudo useradd \
         ${_gid:+-g $_gid} \
         ${uid:+-u $uid} \
-        ${homedir:+-d $homedir} \
+        ${homedir:+-d $homedir -m} \
         ${shell:+-s $shell} \
         ${_user_name}
     fi

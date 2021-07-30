@@ -4,5 +4,6 @@ system_file_contents() {
 }
 
 system_file_source() {
-  system.file /tmp/test_file_template -s /vagrant/tests/files/test_source
+  system.file /tmp/test_file_template \
+    -s /vagrant/tests/files/test_source
 }
