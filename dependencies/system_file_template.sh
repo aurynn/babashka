@@ -12,16 +12,16 @@ system.file.template() {
   while getopts "g:o:m:t:s:" opt; do
     case "$opt" in
       g)
-        group=$(echo $OPTARG | xargs);;
+        _group=$(echo $OPTARG | xargs);;
       o)
-        owner=$(echo $OPTARG | xargs);;
+        _owner=$(echo $OPTARG | xargs);;
       m)
-        mode=$(echo $OPTARG | xargs);;
+        _mode=$(echo $OPTARG | xargs);;
       t)
-        template=$(echo $OPTARG | xargs);;
+        _template=$(echo $OPTARG | xargs);;
       s)
         # Set a variables file
-        variables=$(echo $OPTARG | xargs);;
+        _variables=$(echo $OPTARG | xargs);;
     esac
   done
   unset OPTIND
@@ -31,12 +31,12 @@ system.file.template() {
     __babashka_log "ERROR: system.file.template: template renderer not installed"
     exit -1
   fi
-  if [[ $template == "" ]]; then
+  if [[ $_template == "" ]]; then
     __babashka_log "ERROR: system.file.template: template path must be set"
     exit -1
   fi
-  if ! [[ -e $template ]]; then
-    __babashka_log "ERROR: system.file.template: template $template does not exist"
+  if ! [[ -e $_template ]]; then
+    __babashka_log "ERROR: system.file.template: template $_template does not exist"
     exit -1
   fi
 
@@ -44,14 +44,14 @@ system.file.template() {
     # Basic existence and mode settings
     ! [[ -e $_file_name ]] && return 1
 
-    if [[ $group != "" ]]; then
-      path.has_gid $_file_name $group || return 1
+    if [[ $_group != "" ]]; then
+      path.has_gid $_file_name $_group || return 1
     fi
-    if [[ $owner != "" ]]; then
-      path.has_uid $_file_name $owner || return 1
+    if [[ $_owner != "" ]]; then
+      path.has_uid $_file_name $_owner || return 1
     fi
-    if [[ $mode != "" ]]; then
-      path.has_mode $_file_name $mode || return 1
+    if [[ $_mode != "" ]]; then
+      path.has_mode $_file_name $_mode || return 1
     fi
     # Ensure the contents are what we expect them to be
     # Since this is using a templating engine, we have to render out the
@@ -59,16 +59,16 @@ system.file.template() {
     # so let's get rendering
     # I think we have to assume that variables have been set?
 
-    /usr/bin/mo ${variables:+-s=$variables} $template | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo ${variables:+-s=$variables} $_template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
     # Overwrite the file
-    /usr/bin/mo ${variables:+-s=$variables} $template | $__babashka_sudo tee $_file_name
+    /usr/bin/mo ${variables:+-s=$variables} $_template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
-    [[ $mode != "" ]] && $__babashka_sudo chmod $mode $_file_name
-    [[ $owner != "" ]] && $__babashka_sudo chown $owner $_file_name
-    [[ $group != "" ]] && $__babashka_sudo chgrp $group $_file_name
+    [[ $_mode != "" ]] && $__babashka_sudo chmod $_mode $_file_name
+    [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
+    [[ $_group != "" ]] && $__babashka_sudo chgrp $_group $_file_name
   }
   process
 }
