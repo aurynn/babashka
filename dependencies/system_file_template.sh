@@ -9,7 +9,7 @@ system.file.template() {
   # g: gid or group name
   # o: uid or username
   # t: template
-  while getopts "g:u:m:t:s:" opt; do
+  while getopts "g:o:m:t:s:" opt; do
     case "$opt" in
       g)
         group=$(echo $OPTARG | xargs);;
