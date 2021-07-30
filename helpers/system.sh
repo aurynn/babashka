@@ -60,8 +60,6 @@ path.has_gid() {
   _path=$1; shift
   _gid=$1; shift
   _group=$(group.get_gid $_gid)
-  # UID could be either a username _or_ a UID
-  # So we should resolve that
   if [[ $_group != "" ]] && [[ `stat -c '%g' ${_path}` != $_group ]]; then
     return 1
   fi
@@ -73,7 +71,7 @@ path.has_mode() {
   _mode=$1; shift
   if [[ ${_mode:0:1} == "0" ]]; then
     # Strip the leading 0, as it's implied
-    mode="${_mode:1}"
+    _mode="${_mode:1}"
   fi
   [[ `stat -c '%a' ${_path}` != $_mode ]] && return 1
   return 0

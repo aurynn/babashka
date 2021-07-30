@@ -9,11 +9,11 @@ function system.file() {
   # TODO: Use `getopt` instead to allow more betterer parsing?
   #       Though getopt is often confusing
   #       oh well
-  while getopts "g:u:m:s:c:" opt; do
+  while getopts "g:o:m:s:c:" opt; do
     case "$opt" in
       g)
         group=$(echo $OPTARG | xargs);;
-      u)
+      o)
         owner=$(echo $OPTARG | xargs);;
       m)
         mode=$(echo $OPTARG | xargs);;
