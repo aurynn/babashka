@@ -25,12 +25,12 @@ user.get_uid() {
 
 group.get_gid() {
   _group_name=$1; shift
-  if [[ $gid != "" ]]; then
-    case $gid in
+  if [[ $_group_name != "" ]]; then
+    case $_group_name in
       *[!0-9]*)
         # Is a string, so we need to check if the group even exists
         # And if it doesn't, that's, well, bad? Yes, that's bad.
-        _gid=$(getent group $gid | awk -F ':' '{print $3}')
+        _gid=$(getent group $_group_name | awk -F ':' '{print $3}')
         ;;
       *)
         # is a number
@@ -39,8 +39,9 @@ group.get_gid() {
         ;;
     esac
     echo $_gid
+  else
+    return -1
   fi
-  return -1
 }
 
 path.has_uid() {
