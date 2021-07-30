@@ -7,13 +7,13 @@ system.file.template() {
   _file_name=$1; shift
 
   # g: gid or group name
-  # u: uid or username
+  # o: uid or username
   # t: template
   while getopts "g:u:m:t:s:" opt; do
     case "$opt" in
       g)
         group=$(echo $OPTARG | xargs);;
-      u)
+      o)
         owner=$(echo $OPTARG | xargs);;
       m)
         mode=$(echo $OPTARG | xargs);;
@@ -59,23 +59,12 @@ system.file.template() {
     # so let's get rendering
     # I think we have to assume that variables have been set?
 
-    if [[ $variables != "" ]]; then
-      _rendered=$(/usr/bin/mo -s=$variables $template)
-    else
-      _rendered=$(/usr/bin/mo $template)
-    fi
-
-    echo $_rendered | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo ${variables:+-s=$variables} $template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
-    if [[ $variables != "" ]]; then
-      _rendered=$(/usr/bin/mo -s=$variables $template)
-    else
-      _rendered=$(/usr/bin/mo $template)
-    fi
     # Overwrite the file
-    echo $_rendered | $__babashka_sudo tee $_file_name
+    /usr/bin/mo ${variables:+-s=$variables} $template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
     [[ $mode != "" ]] && $__babashka_sudo chmod $mode $_file_name
     [[ $owner != "" ]] && $__babashka_sudo chown $owner $_file_name
