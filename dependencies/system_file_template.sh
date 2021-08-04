@@ -28,15 +28,13 @@ system.file.template() {
   unset OPTARG
   __babashka_log "system.file.template $_file_name"
   if ! [[ -e /usr/bin/mo ]]; then
-    __babashka_log "ERROR: system.file.template: template renderer not installed"
-    exit -1
+    __babashka_fail "system.file.template: template renderer not installed"
   fi
   if [[ $_template == "" ]]; then
-    __babashka_log "ERROR: system.file.template: template path must be set"
-    exit -1
+    __babashka_fail "system.file.template: template path must be set"
   fi
   if ! [[ -e $_template ]]; then
-    __babashka_log "ERROR: system.file.template: template $_template does not exist"
+    __babashka_fail "system.file.template: template $_template does not exist"
     exit -1
   fi
 

@@ -56,8 +56,7 @@ function system.file() {
       return $?
     else
       # that's an error, at least one of these needs to be set
-      __babashka_log "ERROR: system.file: one of source or contents must be set"
-      exit -1
+      __babashka_fail "system.file: one of source or contents must be set"
     fi
     return 0
   }
