@@ -12,15 +12,15 @@ function system.file() {
   while getopts "g:o:m:s:c:" opt; do
     case "$opt" in
       g)
-        group=$(echo $OPTARG | xargs);;
+        local group=$(echo $OPTARG | xargs);;
       o)
-        owner=$(echo $OPTARG | xargs);;
+        local owner=$(echo $OPTARG | xargs);;
       m)
-        mode=$(echo $OPTARG | xargs);;
+        local mode=$(echo $OPTARG | xargs);;
       s)
-        _source=$(echo $OPTARG | xargs);;
+        local _source=$(echo $OPTARG | xargs);;
       c)
-        contents=$(echo $OPTARG | xargs);;
+        local contents=$(echo $OPTARG | xargs);;
     esac
   done
   unset OPTIND
@@ -44,7 +44,7 @@ function system.file() {
     # TODO I guess?
     # Okay anyway check contents now
 
-    if [[ $_source != "" ]]; then
+    if [[ ${_source} != "" ]]; then
       # okay we're using source
       # We might need sudo privs to read the file
       $__babashka_sudo diff $_file_name $_source
@@ -61,7 +61,7 @@ function system.file() {
     return 0
   }
   function meet() {
-    if [[ $_source != "" ]]; then
+    if [[ ${_source} != "" ]]; then
       $__babashka_sudo cp $_source $_file_name
     else
       # Do it quietly

@@ -12,16 +12,16 @@ system.file.template() {
   while getopts "g:o:m:t:s:" opt; do
     case "$opt" in
       g)
-        _group=$(echo $OPTARG | xargs);;
+        local _group=$(echo $OPTARG | xargs);;
       o)
-        _owner=$(echo $OPTARG | xargs);;
+        local _owner=$(echo $OPTARG | xargs);;
       m)
-        _mode=$(echo $OPTARG | xargs);;
+        local _mode=$(echo $OPTARG | xargs);;
       t)
-        _template=$(echo $OPTARG | xargs);;
+        local _template=$(echo $OPTARG | xargs);;
       s)
         # Set a variables file
-        _variables=$(echo $OPTARG | xargs);;
+        local _variables=$(echo $OPTARG | xargs);;
     esac
   done
   unset OPTIND

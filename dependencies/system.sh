@@ -1,14 +1,14 @@
 function system.directory() {
-  _directory=$1;
+  local _directory=$1;
   shift
   while getopts "o:g:m:" opt; do
     case "$opt" in
       o)
-        owner=$(echo $OPTARG | xargs);;
+        local owner=$(echo $OPTARG | xargs);;
       g)
-        group=$(echo $OPTARG | xargs);;
+        local group=$(echo $OPTARG | xargs);;
       m)
-        mode=$(echo $OPTARG | xargs);;
+        local mode=$(echo $OPTARG | xargs);;
     esac
   done
   # Reset the option parsing

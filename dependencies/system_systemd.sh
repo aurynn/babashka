@@ -1,7 +1,7 @@
 # Manage systemd units
 
 system.systemd.enable() {
-  _unit=$1; shift
+  local _unit=$1; shift
 
   __babashka_log "${FUNCNAME[0]} $_unit"
   # check if the unit even exists; if it doesn't this makes no sense

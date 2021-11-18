@@ -3,8 +3,8 @@
 # Do modes make sense for this?
 
 function system.file.symlink() {
-  _source=$1; shift
-  _dest=$1; shift
+  local _source=$1; shift
+  local _dest=$1; shift
 
   __babashka_log "system.file.symlink ${_source} ${_dest}"
 

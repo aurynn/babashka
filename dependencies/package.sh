@@ -6,9 +6,9 @@ function system.package() {
   while getopts "a:b:" opt; do
     case "$opt" in
       a)
-        apt_pkg=$OPTARG;;
+        local apt_pkg=$OPTARG;;
       b)
-        brew_pkg=$OPTARG;;
+        local brew_pkg=$OPTARG;;
     esac
   done
   unset OPTIND
