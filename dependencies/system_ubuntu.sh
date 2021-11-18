@@ -10,11 +10,11 @@ system.ubuntu.repository.official() {
   requires system.ubuntu.package.add-apt-repository
   __babashka_log "${FUNCNAME[0]} ${_official_repository}"
   function is_met() {
-    grep -rhE ^deb /etc/apt/sources.list* | grep ubuntu.com | grep "$(lsb_release -cs) " | grep -q ${__official_repository}
+    grep -rhE ^deb /etc/apt/sources.list* | grep "ubuntu.com" | grep "$(lsb_release -cs) " | grep -q ${_official_repository}
     return $?
   }
   function meet() {
-    $__babashka_sudo add-apt-repository ${__official_repository}
+    $__babashka_sudo add-apt-repository ${_official_repository}
   }
   process
 }
