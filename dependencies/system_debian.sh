@@ -46,5 +46,5 @@ function system.debian.repo() {
     -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${lsb_release} ${channel}"
 
   __babashka_log "system.debian.repo: running apt update"
-  $__babashka_sudo apt -yqq update
+  DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq update
 }
