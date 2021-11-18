@@ -21,7 +21,7 @@ function system.package() {
      }
      function meet() {
        [ -n "$__babushka_force" ] && apt_flags="${apt_flags} -f --force-yes"
-       $__babashka_sudo apt-get install $apt_flags ${apt_pkg:-$_package_name}
+       DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq install $apt_flags ${apt_pkg:-$_package_name}
      }
      ;;
    Darwin)
