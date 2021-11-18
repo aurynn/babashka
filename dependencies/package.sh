@@ -1,6 +1,6 @@
 function system.package() {
-  _package_name=$1; shift
-  _platform=`uname -s`
+  local _package_name=$1; shift
+  local _platform=`uname -s`
   # -a == apt
   # -b == brew
   while getopts "a:b:" opt; do
@@ -12,10 +12,13 @@ function system.package() {
     esac
   done
   unset OPTIND
+  unset OPTARG
+  # Any flags you want to set should be set via apt_flags= outside this
+  # function call
   __babashka_log "system.package $_package_name"
   case "`uname -s`" in
     Linux)
-     # TODO things other than debian derivatives
+     # TODO: things other than Debian derivatives
      function is_met() {
        dpkg -l | grep ${apt_pkg:-$_package_name}
      }

@@ -1,4 +1,4 @@
-function system.debian.repo() {
+function system.debian.repo.custom() {
   _repo_name=$1; shift
 
   while getopts "k:u:a:c:" opt; do
@@ -20,7 +20,7 @@ function system.debian.repo() {
   unset OPTIND
   unset OPTARG
 
-  __babashka_log "system.debian.repo $_repo_name"
+  __babashka_log "${FUNCNAME[0]} $_repo_name"
   _gpg_key_path=/usr/share/keyrings/${_repo_name}-archive-keyring.gpg
   _repo_path=/etc/apt/sources.list.d/${_repo_name}.list
 
