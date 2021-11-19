@@ -73,3 +73,25 @@ function system.file() {
   }
   process
 }
+
+function system.file.line() {
+    local _file=$1; shift
+    while getopts "c:" opt; do
+      case "$opt" in
+        c)
+          # Why do I do this everwhere?
+          _contents="$OPTARG";;
+      esac
+    done
+    unset OPTIND
+    unset OPTARG
+    __babashka_log "${FUNCNAME[0]} $_file $_contents"
+    function is_met() {
+      # Check the beginning of the line
+      $__babashka_sudo grep "^$_contents" $_file
+    }
+    function meet() {
+      echo "$_contents" | $__babashka_sudo tee -a $_file
+    }
+    process
+  }
