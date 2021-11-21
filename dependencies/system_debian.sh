@@ -31,20 +31,28 @@ function system.debian.repo.custom() {
     _keyfile=$key
   fi
 
-  local lsb_release=$(lsb_release -cs)
-  system.file ${_gpg_key_path} \
-    -o root \
-    -g root \
-    -m 0644 \
-    -s ${_keyfile}
-  # I'm not sure this is a good idea...
-  # The signed-by, specifically
-  system.file ${_repo_path} \
-    -o root \
-    -g root \
-    -m 0644 \
-    -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${lsb_release} ${channel}"
+  function is_met() {
+    # and the apt repo on-disk is up-to-date? Hmm.
+    [[ -e $_gpg_key_path ]] && \
+      [[ -e $_repo_path ]]
+  }
+  function meet() {
+    local lsb_release=$(lsb_release -cs)
+    system.file ${_gpg_key_path} \
+      -o root \
+      -g root \
+      -m 0644 \
+      -s ${_keyfile}
+    # I'm not sure this is a good idea...
+    # The signed-by, specifically
+    system.file ${_repo_path} \
+      -o root \
+      -g root \
+      -m 0644 \
+      -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${lsb_release} ${channel}"
 
-  __babashka_log "system.debian.repo: running apt update"
-  DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq update
+    __babashka_log "${FUNCNAME[0]}: running apt update"
+    DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq update
+  }
+  process
 }
