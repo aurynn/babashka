@@ -24,13 +24,6 @@ function system.debian.repo.custom() {
   _gpg_key_path=/usr/share/keyrings/${_repo_name}-archive-keyring.gpg
   _repo_path=/etc/apt/sources.list.d/${_repo_name}.list
 
-  if echo $key | grep -q "http[s]*://"; then
-    /usr/bin/curl -fsSL $key | $__babashka_sudo gpg --dearmor --yes -o /root/${_repo_name}-archive-keyring.gpg
-    _keyfile=/root/${_repo_name}-archive-keyring.gpg
-  else
-    _keyfile=$key
-  fi
-
   function is_met() {
     # and the apt repo on-disk is up-to-date? Hmm.
     [[ -e $_gpg_key_path ]] && \
@@ -38,6 +31,14 @@ function system.debian.repo.custom() {
   }
   function meet() {
     local lsb_release=$(lsb_release -cs)
+
+    if echo $key | grep -q "http[s]*://"; then
+      /usr/bin/curl -fsSL $key | $__babashka_sudo gpg --dearmor --yes -o /root/${_repo_name}-archive-keyring.gpg
+      _keyfile=/root/${_repo_name}-archive-keyring.gpg
+    else
+      _keyfile=$key
+    fi
+
     system.file ${_gpg_key_path} \
       -o root \
       -g root \
