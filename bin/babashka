@@ -45,8 +45,8 @@ if [ $__babashka_trace = "yes" ]; then
 fi
 
 __babashka_log() {
-    printf "%*s"  "$__babashka_current_indent"
-    printf "%s\n" "$@"
+    printf "%*s"  "$__babashka_current_indent" 1>&2
+    printf "%s\n" "$@" 1>&2
 }
 
 __babashka_fail() {

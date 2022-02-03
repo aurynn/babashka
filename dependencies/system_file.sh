@@ -1,7 +1,7 @@
 # Manages a file on disk somewhere
 
 function system.file() {
-  _file_name=$1; shift
+  local _file_name=$1; shift
   # g: gid or group name
   # u: uid or username
   # s: source (optional)
@@ -25,9 +25,10 @@ function system.file() {
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "system.file $_file_name"
+  __babashka_log "${FUNCNAME[0]} $_file_name"
 
   function is_met() {
+    __babashka_log "file name: $_file_name"
     ! [[ -e $_file_name ]] && return 1
 
     if [[ $group != "" ]]; then
@@ -56,7 +57,7 @@ function system.file() {
       return $?
     else
       # that's an error, at least one of these needs to be set
-      __babashka_fail "system.file: one of source or contents must be set"
+      __babashka_fail "${FUNCNAME[0]} $_file_name: one of source or contents must be set"
     fi
     return 0
   }
