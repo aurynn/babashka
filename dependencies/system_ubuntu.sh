@@ -15,6 +15,7 @@ system.ubuntu.repository.official() {
   }
   function meet() {
     $__babashka_sudo add-apt-repository ${_official_repository}
+    $__babashka_sudo apt-get -y update
   }
   process
 }

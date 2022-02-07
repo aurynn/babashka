@@ -4,7 +4,7 @@
 
 system.file.template() {
   # path to manage
-  _file_name=$1; shift
+  local _file_name=$1; shift
 
   # g: gid or group name
   # o: uid or username
@@ -21,12 +21,13 @@ system.file.template() {
         local _template=$(echo $OPTARG | xargs);;
       s)
         # Set a variables file
+        # ... why is this -s and not -v ?
         local _variables=$(echo $OPTARG | xargs);;
     esac
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "system.file.template $_file_name"
+  __babashka_log "${FUNCNAME[0]} $_file_name"
   if ! [[ -e /usr/bin/mo ]]; then
     __babashka_fail "system.file.template: template renderer not installed"
   fi
@@ -57,12 +58,12 @@ system.file.template() {
     # so let's get rendering
     # I think we have to assume that variables have been set?
 
-    /usr/bin/mo ${variables:+-s=$variables} $_template | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo ${_variables:+-s=$_variables} $_template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
     # Overwrite the file
-    /usr/bin/mo ${variables:+-s=$variables} $_template | $__babashka_sudo tee $_file_name
+    /usr/bin/mo ${_variables:+-s=$_variables} $_template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
     [[ $_mode != "" ]] && $__babashka_sudo chmod $_mode $_file_name
     [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
