@@ -76,23 +76,39 @@ function system.file() {
 }
 
 function system.file.line() {
-    local _file=$1; shift
-    while getopts "c:" opt; do
-      case "$opt" in
-        c)
-          # Why do I do this everwhere?
-          _contents="$OPTARG";;
-      esac
-    done
-    unset OPTIND
-    unset OPTARG
-    __babashka_log "${FUNCNAME[0]} $_file $_contents"
-    function is_met() {
-      # Check the beginning of the line
-      $__babashka_sudo grep "^$_contents" $_file
-    }
-    function meet() {
-      echo "$_contents" | $__babashka_sudo tee -a $_file
-    }
-    process
+  local _file=$1; shift
+  while getopts "c:" opt; do
+    case "$opt" in
+      c)
+        # Why do I do this everwhere?
+        local _contents="$OPTARG";;
+    esac
+  done
+  unset OPTIND
+  unset OPTARG
+  __babashka_log "${FUNCNAME[0]} $_file $_contents"
+  function is_met() {
+    # Check the beginning of the line
+    $__babashka_sudo grep "^$_contents" $_file
   }
+  function meet() {
+    echo "$_contents" | $__babashka_sudo tee -a $_file
+  }
+  process
+}
+
+# Ensure a file does not exist
+function system.file.absent() {
+  local _file=$1; shift;
+  __babashka_log "${FUNCNAME[0]} $_file"
+  if [[ -d $_file ]]; then
+    __babashka_fail "ERROR: $_file is a directory"
+  fi
+  function is_met() {
+    ! [[ -e $_file ]];
+  }
+  function meet() {
+    $__babashka_sudo rm $_file;
+  }
+  process
+}
