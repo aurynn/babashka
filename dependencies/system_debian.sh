@@ -14,13 +14,13 @@ function __system.debian.repo.custom.worker() {
     -o root \
     -g root \
     -m 0644 \
-    -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${lsb_release} ${channel}"
+    -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${distribution} ${channel}"
 }
 
 function system.debian.repo.custom() {
   local _repo_name=$1; shift
 
-  while getopts "k:u:a:c:" opt; do
+  while getopts "k:u:a:c:d:" opt; do
     case "$opt" in
       k)
         # Key URL or file
@@ -33,6 +33,9 @@ function system.debian.repo.custom() {
         local arch=$(echo $OPTARG | xargs);;
       c)
         local channel=$(echo $OPTARG | xargs);;
+      d)
+        # override the distribution name
+        local distribution=$(echo $OPTARG | xargs);;
     esac
   done
   # Reset our loops, to not break other things
@@ -45,6 +48,9 @@ function system.debian.repo.custom() {
 
   function is_met() {
     # and the apt repo on-disk is up-to-date? Hmm.
+    if [[ "$distribution " == " " ]]; then
+      distribution=$(lsb_release -cs)
+    fi
     __babashka_log "key path: $_gpg_key_path"
     __babashka_log "repo path: $_repo_path"
     if [[ -e $_gpg_key_path ]] && \
@@ -55,8 +61,9 @@ function system.debian.repo.custom() {
     return 1
   }
   function meet() {
-    local lsb_release=$(lsb_release -cs)
-
+    if [[ "$distribution " == " " ]]; then
+      distribution=$(lsb_release -cs)
+    fi
     if echo $key | grep -q "http[s]*://"; then
       /usr/bin/curl -fsSL $key | $__babashka_sudo gpg --dearmor --yes -o $HOME/${_repo_name}-archive-keyring.gpg
       _keyfile=$HOME/${_repo_name}-archive-keyring.gpg
