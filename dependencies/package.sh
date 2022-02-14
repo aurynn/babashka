@@ -20,7 +20,7 @@ function system.package() {
     Linux)
      # TODO: things other than Debian derivatives
      function is_met() {
-       dpkg -l | awk '{print $2}' | grep "^${apt_pkg:-$_package_name}$"
+       dpkg -s ${apt_pkg:-$_package_name}
      }
      function meet() {
        [ -n "$__babushka_force" ] && apt_flags="${apt_flags} -f --force-yes"
@@ -45,7 +45,7 @@ function system.package.absent() {
 
   __babashka_log "${FUNCNAME[0]} $_package_name"
   function is_met() {
-     dpkg -l | awk '{print $2}' | grep "^${apt_pkg:-$_package_name}$" && return 1
+    dpkg -s ${apt_pkg:-$_package_name} && return 1
      return 0
    }
    function meet() {
