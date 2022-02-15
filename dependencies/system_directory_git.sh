@@ -87,7 +87,9 @@ function system.directory.git() {
     # otherwise, it's an existing directory, and we've already confirmed that
     # we need to fetch, so
     pushd $_directory
-    /usr/bin/git remote -v | while read repo; do
+    local _IFS=$IFS
+    IFS=$'\n'
+    for repo in $(/usr/bin/git remote -v); do
       _name=$(echo $repo | awk '{print $1}' | sed -e 's/\n//')
       _url=$(echo $repo | awk '{print $2}' | sed -e 's/\n//')
       _type=$(echo $repo | awk '{print $3}' | sed -e 's/\n//')
@@ -100,8 +102,11 @@ function system.directory.git() {
       fi
       local _current_branch=$(/usr/bin/git rev-parse --abbrev-ref HEAD)
       /usr/bin/git pull $_name $_current_branch
+      IFS=$_IFS
       return $?
     done
+    IFS=$_IFS
+    return 1
   }
   process
 }
