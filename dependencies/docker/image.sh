@@ -1,4 +1,4 @@
-docker.skopeo.install() {
+docker.prerequisites.install() {
   # Needed for managing Docker installations
   system.package skopeo
   system.package jq
