@@ -7,7 +7,7 @@ docker.prerequisites.install() {
 docker.image() {
   local _image=$1; shift
 
-  __babashka_log "${FUNCNAME[0]} $_directory"
+  __babashka_log "${FUNCNAME[0]} $_image"
   # this needs to verify that Docker is, in fact, installed
   if ! [[ -e /usr/bin/docker ]] && ! [[ -x /usr/bin/docker ]]; then
     # Error out, because we don't have Docker installed
