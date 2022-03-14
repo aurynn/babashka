@@ -17,11 +17,11 @@ docker.image() {
   requires docker.prerequisites.install
   function is_met() {
 
-    if ! docker inspect $_image 2>/dev/null | jq -e -r '.[0].Id'; then
+    if ! $__babashka_sudo /usr/bin/docker inspect $_image 2>/dev/null | jq -e -r '.[0].Id'; then
       return 1
     fi
-    LOCAL_SHA=$(docker inspect $_image 2>/dev/null | jq -r '.[0].RepoDigests[0]' | cut -d '@' -f2)
-    REMOTE_SHA=$(skopeo inspect docker://$_image | jq -r '.Digest')
+    LOCAL_SHA=$($__babashka_sudo /usr/bin/docker inspect $_image 2>/dev/null | jq -r '.[0].RepoDigests[0]' | cut -d '@' -f2)
+    REMOTE_SHA=$(/usr/bin/skopeo inspect docker://$_image | jq -r '.Digest')
 
     if [[ $LOCAL_SHA != $REMOTE_SHA ]]; then
       return 1
@@ -29,7 +29,7 @@ docker.image() {
     return 0
   }
   function meet() {
-    docker pull -q $_image
+    $__babashka_sudo /usr/bin/docker pull -q $_image
   }
   process
 }

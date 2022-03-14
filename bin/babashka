@@ -18,6 +18,8 @@ while getopts "vfxsd:" opt; do
             __babashka_trace=yes
             ;;
         s)
+        # TODO:
+        # Hardcode the sudo path, since this is potentially a bit dicey
             __babashka_sudo="sudo"
             ;;
         f)
