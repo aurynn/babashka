@@ -4,7 +4,7 @@ postgres.database.create() {
   while getopts "o:" opt; do
     case "$opt" in
       o)
-        local owner=$OPTARG;;
+        local _owner=$OPTARG;;
     esac
   done
   unset OPTIND
@@ -26,8 +26,6 @@ postgres.database.create() {
         return 1
       fi
     fi
-    # TODO:
-    # Password check? Is that even sensible?
     return 0
   }
   function meet() {
