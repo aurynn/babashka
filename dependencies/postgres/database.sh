@@ -36,7 +36,7 @@ postgres.database.create() {
       /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "CREATE DATABASE ${_database};"
     fi
     if [[ "${_owner} " != " " ]]; then
-      /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "ALTER DATABASE ${_database} WITH OWNER ${_owner};"
+      /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "ALTER DATABASE ${_database} OWNER TO ${_owner};"
     fi
   }
   process
