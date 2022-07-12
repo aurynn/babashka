@@ -1,13 +1,31 @@
 function system.package.pip() {
   local _package_name=$1; shift
 
+  while getopts "us:" opt; do
+    case "$opt" in
+    s)
+      local _source=$OPTARG;;
+    u)
+      # Enable the upgrade flag
+      local _upgrade_flag="-U";;
+    esac
+  done
+
+  unset OPTIND
+  unset OPTARG
+
   __funcname=${FUNCNAME[0]}
   __babashka_log "${FUNCNAME[0]} $_package_name"
   function is_met() {
     /usr/bin/pip -qqq show $_package_name
   }
   function meet() {
-    $__babashka_sudo /usr/bin/pip -qqq install "$_package_name"
+    if [ "$_source " != " " ] ; then
+      $__babashka_sudo /usr/bin/pip -qqq install "$_source" && return $?
+    else
+      # Assumes that we're trying to install from PyPI
+      $__babashka_sudo /usr/bin/pip -qqq install "$_package_name" && return $?
+    fi
   }
   process
 }
