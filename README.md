@@ -95,8 +95,8 @@ babashka mysql_environment
 
 ## What people are saying about babashka
 
-"You're a bad person"
+"This is absolutely effing cursed"
 
-~ [@larsyencken](https://twitter.com/larsyencken)
+~ [@ryankurte](https://twitter.com/ryankurte)
 
 [1]: https://babushka.me
