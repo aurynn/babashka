@@ -14,3 +14,11 @@ system_debian_repo_custom_distribution() {
     -a amd64 \
     -c main
 }
+
+system.debian.repo.hashicorp() {
+  system.debian.repo.custom hashicorp \
+  -k https://apt.releases.hashicorp.com/gpg \
+  -u https://apt.releases.hashicorp.com \
+  -a amd64 \
+  -c main
+}

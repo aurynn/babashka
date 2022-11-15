@@ -95,8 +95,7 @@ babashka mysql_environment
 
 ## What people are saying about babashka
 
-"This is absolutely effing cursed"
-
+"This is absolutely f**king cursed"
 ~ [@ryankurte](https://twitter.com/ryankurte)
 
 [1]: https://babushka.me
