@@ -29,7 +29,8 @@ docker.image() {
     return 0
   }
   function meet() {
-    $__babashka_sudo /usr/bin/docker pull -q $_image
+    # Apparently docker pull has decided to be noisy
+    $__babashka_sudo /usr/bin/docker pull -q $_image 2>/dev/null
   }
   process
 }
