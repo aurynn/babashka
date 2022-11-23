@@ -31,10 +31,10 @@ docker.dns.enable() {
 docker.install() {
   requires docker.packages
   requires docker.repo
-  requires docker.prerequisites.install
   system.package containerd.io
   system.package docker-ce
   system.package docker-ce-cli
+  requires docker.prerequisites.install
   # requires system.debian.packages.support
 }
 
