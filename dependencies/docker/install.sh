@@ -31,7 +31,7 @@ docker.dns.enable() {
 docker.install() {
   requires docker.packages
   requires docker.repo
-  requires docker.prequisites.install
+  requires docker.prerequisites.install
   system.package containerd.io
   system.package docker-ce
   system.package docker-ce-cli
