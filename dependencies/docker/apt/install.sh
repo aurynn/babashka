@@ -34,7 +34,7 @@ docker.install() {
   system.package containerd.io
   system.package docker-ce
   system.package docker-ce-cli
-  requires docker.prerequisites.install
+  requires docker.prerequisites.skopeo
   # requires system.debian.packages.support
 }
 
