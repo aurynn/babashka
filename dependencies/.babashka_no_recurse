@@ -1,0 +1,4 @@
+# Tells Babashka not to recurse inside this directory, when looking for 
+# dependencies to load
+# This is done so that per-operating-system dependency definitions can be 
+# provided.

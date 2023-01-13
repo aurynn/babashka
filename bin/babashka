@@ -118,9 +118,20 @@ function __babashka_load_deps() {
 # [$2] - pattern to match for deps
 function __babashka_find_deps_from_path() {
     # Use -L to follow links
-    find -L "$1" -type f -iname "*.${2:-sh}"
-                      # TODO
-                      # ... todo what?
+    # So we're looking for a special file, the "don't recurse" file, to keep
+    # Babashka from walking the whole tree to look for shell files to load.
+    # We also want to skip any directories named "files", since that's the default
+    # location for files being used by configuration management to live.
+    if [ $(basename "$1") = "files" ] && -d $1; then 
+        # Skip this, because it's likely a files directory and shouldn't be 
+        # scanned
+        return
+    fi
+    if [ -e "$1/.babashka_no_recurse" ]; then
+        find -L "$1" -maxdepth 1 -type f -iname "*.${2:-sh}" 
+    else
+        find -L "$1" -type f -iname "*.${2:-sh}"
+    fi
 }
 
 # $1 - path to load deps from
