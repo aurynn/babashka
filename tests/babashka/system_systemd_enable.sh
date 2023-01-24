@@ -1,19 +1,19 @@
-system_systemd_enable() {
+# system_systemd_enable() {
+# 
+#   system.service.enable acpid.service
+# }
+# 
+# system_systemd_enable_missing() {
+# 
+#   system.service.enable nonexistent.service
+# }
 
-  system.service.enable acpid.service
-}
-
-system_systemd_enable_missing() {
-
-  system.service.enable nonexistent.service
-}
-
-system_openrc_enable() {
+system_enable() {
   system.package nginx
   system.service.enable nginx
 }
 
-system_openrc_disable() {
+system_disable() {
   system.service.disable nginx
 }
 

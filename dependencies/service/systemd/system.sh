@@ -3,10 +3,10 @@
 system.service.enable() {
   local _unit=$1; shift
 
-  __babashka_log "${FUNCNAME[0]} $_unit"
+  __babashka_log "${FUNCNAME[0]} (systemd) $_unit"
   # check if the unit even exists; if it doesn't this makes no sense
-  if systemctl is-enabled "$_unit" | grep -q "No such file or directory" > /dev/null ; then
-    __babashka_fail "${FUNCNAME[0]}: Unit $_unit not installed"
+  if systemctl is-enabled "$_unit" 2>&1 | grep -q "No such file or directory" ; then
+    __babashka_fail "${FUNCNAME[0]} (systemd): Unit $_unit not installed"
   fi
 
   is_met() {
@@ -21,11 +21,11 @@ system.service.enable() {
 
 system.service.disable() {
   local _unit=$1; shift
-  __babashka_log "${FUNCNAME[0]} $_unit"
+  __babashka_log "${FUNCNAME[0]} (systemd)  $_unit"
 
   # check if the unit even exists; if it doesn't this makes no sense
-  if systemctl is-enabled "$_unit" | grep -q "No such file or directory" > /dev/null ; then
-    __babashka_fail "${FUNCNAME[0]}: Unit $_unit not installed"
+  if systemctl is-enabled "$_unit" 2>&1 | grep -q "No such file or directory" ; then
+    __babashka_fail "${FUNCNAME[0]} (systemd): Unit $_unit not installed"
   fi
 
   is_met() {
