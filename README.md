@@ -34,6 +34,14 @@ For example, `~/projects/myapp/babashka/deploy.sh` might contain deployment scri
 
 `babashka` takes an argument, `-d`, to add another search path for dependencies.
 
+## Files
+
+Babashka will ignore anything in subdirectories named `files/`. This is to allow for files that will be moved into the filesystem to be included in a Babashka directory tree.
+
+## Built-ins
+
+Babashka comes with a number of built-in functions to make developing your infrastructure-as-code easier. Documentation (in-progress) for these builtins is in [docs/README.md](docs/README.md).
+
 ## Templating
 
 `babashka` comes with a built-in, `system.file.template`, which takes advantage of [Mo](https://github.com/tests-always-included/mo). This is an optional dependency.
@@ -50,7 +58,7 @@ zsh_installed() {
     which zsh
   }
   function meet() {
-    sudo aptitude install zsh
+    sudo apt-get -y install zsh
   }
   process # Process line is important, you must include it.
 }

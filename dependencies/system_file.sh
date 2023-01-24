@@ -64,9 +64,12 @@ function system.file() {
   function meet() {
     if [[ ${_source} != "" ]]; then
       $__babashka_sudo cp $_source $_file_name
-    else
+    elif [[ $contents != "" ]]; then
       # Do it quietly
       echo $contents | $__babashka_sudo tee $_file_name > /dev/null
+    else
+      # Fail
+      return false;
     fi
     [[ $mode != "" ]] && $__babashka_sudo chmod $mode $_file_name
     [[ $owner != "" ]] && $__babashka_sudo chown $owner $_file_name
@@ -80,7 +83,7 @@ function system.file.line() {
   while getopts "c:" opt; do
     case "$opt" in
       c)
-        # Why do I do this everwhere?
+        # Why do I do this everywhere?
         local _contents="$OPTARG";;
     esac
   done
