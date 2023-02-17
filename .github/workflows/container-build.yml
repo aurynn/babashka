@@ -25,6 +25,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ github.token }}
+      # container names must be lower case
+      - name: Image Name
+        id: image_name
+        uses: ASzc/change-string-case-action@v2
+        with:
+          string: ${{ github.repository }}
       -
         name: Build and push
         uses: docker/build-push-action@v3
@@ -33,5 +39,5 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:${{ github.ref_name }}
+            ghcr.io/${{ steps.image_name.outputs.lowercase }}:${{ github.sha }}
+            ghcr.io/${{ steps.image_name.outputs.lowercase }}:${{ github.ref_name }}
