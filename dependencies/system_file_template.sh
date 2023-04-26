@@ -9,6 +9,9 @@ system.file.template() {
   # g: gid or group name
   # o: uid or username
   # t: template
+  
+  # Declare the array that'll hold our values
+  local _vararray=()
   while getopts "g:o:m:t:s:" opt; do
     case "$opt" in
       g)
@@ -22,12 +25,17 @@ system.file.template() {
       s)
         # Set a variables file
         # ... why is this -s and not -v ?
-        local _variables=$(echo $OPTARG | xargs);;
+        #     TODO: Allow it to fall through?
+        # Allows for multiple variable files to be used
+        
+        _vararray+=( $OPTARG );;
     esac
   done
   unset OPTIND
   unset OPTARG
   __babashka_log "${FUNCNAME[0]} $_file_name"
+  # Ughhhhh this is wrong
+  # Do I need a config file for this?
   if ! [[ -e /usr/bin/mo ]]; then
     __babashka_fail "${FUNCNAME[0]}: template renderer mo not installed."
   fi
@@ -38,7 +46,15 @@ system.file.template() {
     __babashka_fail "${FUNCNAME[0]}: template $_template does not exist."
     exit -1
   fi
-
+  
+  local _variables=""
+  for var in "${_vararray[@]}"; do 
+    if ! [[ -e $var ]]; then
+      __babashka_fail "${FUNCNAME[0]}: variable source file $_var does not exist."
+    fi
+    _variables="${_variables} -s=$var";
+  done
+  
   function is_met() {
     # Basic existence and mode settings
     ! [[ -e $_file_name ]] && return 1
@@ -57,13 +73,16 @@ system.file.template() {
     # template in order to compare it to the on-disk file
     # so let's get rendering
     # I think we have to assume that variables have been set?
+    
+    # Okay so if we want to support multiple variables files,
+    # we need to force $_variables into an array? I think?
 
-    /usr/bin/mo ${_variables:+-s=$_variables} $_template | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo ${_variables} $_template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
     # Overwrite the file
-    /usr/bin/mo ${_variables:+-s=$_variables} $_template | $__babashka_sudo tee $_file_name
+    /usr/bin/mo ${_variables} $_template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
     [[ $_mode != "" ]] && $__babashka_sudo chmod $_mode $_file_name
     [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
