@@ -1,7 +1,7 @@
 function system.group() {
   _group_name=$1; shift
 
-  __babashka_log "system.group $_group_name"
+  __babashka_log "${FUNCNAME[0]} $_group_name"
   while getopts "g:" opt; do
     case "$opt" in
       # echoing through xargs trims whitespace
@@ -61,7 +61,7 @@ function system.user() {
   # Reset the option parsing
   unset OPTIND
   unset OPTARG
-  __babashka_log "system.user $_user_name"
+  __babashka_log "${FUNCNAME[0]} $_user_name"
   if [[ is_system == true ]]; then
     unset $homedir
   fi
@@ -131,3 +131,82 @@ function system.user() {
   process
 }
 
+system.user.groups() {
+  _user_name=$1; shift
+  # g: gid or group name
+  
+  # Should this enforce that a user is _only_ part of these groups?
+  # hmm.
+  # Yeah, yeah I think that's reasonable
+  
+  
+  local _groups=();
+  while getopts "g:" opt; do
+    case "$opt" in
+      g)
+        _groups+=( $OPTARG )
+    esac
+  done
+  # Reset the option parsing
+  unset OPTIND
+  unset OPTARG
+  __babashka_log "${FUNCNAME[0]} $_user_name"
+  getent passwd ${_user_name} > /dev/null || __babashka_fail "${FUNCNAME[0]}: User $_user_name does not exist."
+  
+  for group in ${_groups[@]}; do
+    getent group $group > /dev/null || __babashka_fail "${FUNCNAME[0]}: Group $group does not exist."
+  done
+  
+  function is_met() {
+    
+    # We want to look at all the groups, since we've decided that this tool
+    # is authoritative on what groups a user is a member of now
+    
+    # find any places where the user isn't where it should be
+    
+    for group in "${_groups[@]}"; do
+      members=$(getent group $group | awk -F ':' '{print $4}')
+      # Make the members into an array that we can iterate over
+      members=(${members//,/ })
+      if (( ${#members[@]} == 0 )) ; then
+        return 1
+      fi
+      for member in ${members[@]}; do
+        if [[ $member == $_user_name ]]; then
+          break
+        fi
+        return 1
+      done
+    done
+    
+    # Find if the user is in any places it shouldn't be
+    
+    for group in $( groups ); do
+      for ingrp in "${_groups[@]}"; do
+        if [[ $ingrp == $group ]]; then
+          # We've already checked the should-be-here groups, so we can just
+          # continue around to the next iteration of the outer loop of all groups.
+          continue 2
+        fi
+      done
+      # get the members of this group
+      members=$(getent group $group | awk -F ':' '{print $4}')
+      # Make the members into an array  we can iterate over
+      members=(${members//,/ })
+      for member in ${members[@]}; do
+        if [[ $member == $_user_name ]]; then
+          return 1
+        fi
+      done
+    done
+    # Everything is as it should be
+    return 0
+  }
+  function meet() {
+    groups=$(IFS=, ; echo "${_groups[*]}")
+    $__babashka_sudo usermod \
+      -G $groups \
+      ${_user_name}
+  }
+  process
+}
