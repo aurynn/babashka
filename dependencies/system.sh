@@ -173,10 +173,10 @@ system.user.groups() {
       fi
       for member in ${members[@]}; do
         if [[ $member == $_user_name ]]; then
-          break
+          continue 2
         fi
-        return 1
       done
+      return 1
     done
     
     # Find if the user is in any places it shouldn't be
