@@ -20,18 +20,14 @@ function system.directory() {
     if ! [[ -d $_directory ]]; then
       return 1
     fi
-    if [[ $group != "" ]] && [[ `stat -c '%G' ${_directory}` != $group ]]; then
-      return 1
+    if [[ $group != "" ]]; then
+      path.has_gid $_directory $group || return 1
     fi
-    if [[ $owner != "" ]] && [[ `stat -c '%U' ${_directory}` != $owner ]]; then
-      return 1
+    if [[ $owner != "" ]]; then
+      path.has_uid $_directory $owner || return 1
     fi
     if [[ $mode != "" ]]; then
-      if [[ ${mode:0:1} == "0" ]]; then
-        # Strip the leading 0, as it's implied
-        mode="${mode:1}"
-      fi
-      [[ `stat -c '%a' ${_directory}` != $mode ]] && return 1
+      path.has_mode $_directory $mode || return 1
     fi
     return 0
   }
