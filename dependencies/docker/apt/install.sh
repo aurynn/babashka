@@ -7,11 +7,18 @@ docker.packages() {
   # JQ allows for json parsing later, which we need
   system.package jq
 }
+
 docker.repo() {
+  
+  # get our system type
+  # and our architecture
+  system_type=$(lsb_release -is | tr '[:upper:]' '[:lower:]')
+  arch=$(dpkg --print-architecture)
+  
   system.debian.repo.custom docker \
-    -k https://download.docker.com/linux/ubuntu/gpg \
-    -u https://download.docker.com/linux/ubuntu \
-    -a amd64 \
+    -k https://download.docker.com/linux/$system_type/gpg \
+    -u https://download.docker.com/linux/$system_type \
+    -a $arch \
     -c stable
 }
 
