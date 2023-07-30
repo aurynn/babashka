@@ -1,12 +1,13 @@
 postgres.repo() {
   local ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+  arch=$(dpkg --print-architecture)
   # Set up the repo
   system.debian.repo.custom pgdg \
     -k https://www.postgresql.org/media/keys/ACCC4CF8.asc \
     -u http://apt.postgresql.org/pub/repos/apt/ \
     -d "$(lsb_release -cs)-pgdg" \
-    -a amd64 \
+    -a $arch \
     -c main
 
   # Pin the pgdg packages over the system-provided packages
