@@ -50,7 +50,7 @@ system.file.template() {
   local _variables=""
   for var in "${_vararray[@]}"; do 
     if ! [[ -e $var ]]; then
-      __babashka_fail "${FUNCNAME[0]}: variable source file $_var does not exist."
+      __babashka_fail "${FUNCNAME[0]}: variable source file $var does not exist."
     fi
     _variables="${_variables} -s=$var";
   done
