@@ -6,7 +6,7 @@ system.debian.repo.docker() {
     -c stable
 }
 
-system_debian_repo_custom_distribution() {
+system.debian.repo.pgdg() {
   system.debian.repo.custom pgdg \
     -k https://www.postgresql.org/media/keys/ACCC4CF8.asc \
     -u http://apt.postgresql.org/pub/repos/apt/ \

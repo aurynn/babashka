@@ -14,7 +14,7 @@ function __system.debian.repo.custom.worker() {
     -o root \
     -g root \
     -m 0644 \
-    -c "deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${distribution} ${channel}"
+    -c "$_contents"
 }
 
 function system.debian.repo.custom() {
@@ -45,37 +45,42 @@ function system.debian.repo.custom() {
   __babashka_log "${FUNCNAME[0]} $_repo_name"
   _gpg_key_path=/usr/share/keyrings/${_repo_name}-archive-keyring.gpg
   _repo_path=/etc/apt/sources.list.d/${_repo_name}.list
-
+  
+  if [[ "$distribution " == " " ]]; then
+    distribution=$(lsb_release -cs)
+  fi
+  if [[ "$arch " == " " ]]; then
+    arch=$(dpkg --print-architecture)
+  fi
+  
+  # Generate what we expect the contents to look like
+  _contents="deb [arch=${arch} signed-by=${_gpg_key_path}] ${url} ${distribution} ${channel}"
+  
+  # If the key is an http link, fetch it first
+  if echo $key | grep -q "http[s]*://"; then
+    __babashka_log "${__funcname}: Fetching remote GPG key"
+    /usr/bin/curl -fsSL $key | $__babashka_sudo gpg --dearmor --yes -o $HOME/${_repo_name}-archive-keyring.gpg
+    _keyfile=$HOME/${_repo_name}-archive-keyring.gpg
+  else
+    _keyfile=$key
+  fi
+  
   function is_met() {
     # and the apt repo on-disk is up-to-date? Hmm.
-    if [[ "$distribution " == " " ]]; then
-      distribution=$(lsb_release -cs)
-    fi
+    
     __babashka_log "key path: $_gpg_key_path"
     __babashka_log "repo path: $_repo_path"
-    if [[ -e $_gpg_key_path ]] && \
-      [[ -e $_repo_path ]]; then
-      return 0;
+    if ! [[ -e $_gpg_key_path ]] && \
+      ! [[ -e $_repo_path ]]; then
+      # TODO:
+      # This isn't good enough. Fix this.
+      return 1;
     fi
-    # __babashka_log $?
-    return 1
+    $__babashka_sudo diff $_gpg_key_path $_keyfile 2>&1 > /dev/null || return 1
+    echo "$_contents" | $__babashka_sudo diff $_repo_path - 2>&1 > /dev/null || return 1
+    # return 0; 
   }
   function meet() {
-    if [[ "$distribution " == " " ]]; then
-      distribution=$(lsb_release -cs)
-    fi
-    if echo $key | grep -q "http[s]*://"; then
-      /usr/bin/curl -fsSL $key | $__babashka_sudo gpg --dearmor --yes -o $HOME/${_repo_name}-archive-keyring.gpg
-      _keyfile=$HOME/${_repo_name}-archive-keyring.gpg
-    else
-      _keyfile=$key
-    fi
-
-    __babashka_log "${__funcname}: creating GPG key"
-
-    # requires_nested to force Babashka to call out to a new script context
-    # and run this, before coming back and finishing up here.
-    # Should(??) work.
 
     # wait how did the variables make it into the function call
     # weeeeird
