@@ -34,3 +34,10 @@ system_file_template_group_root() {
     -g root \
     -o root
 }
+
+system.file.template.foreach() {
+  ABSOLUTE_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  system.file.template /tmp/template \
+    -t ${ABSOLUTE_PATH}/../files/templates/test_foreach.mo \
+    -s ${ABSOLUTE_PATH}/../files/templates/test_foreach_variables
+}

@@ -1,0 +1,13 @@
+declare -A one
+one=(\
+  [name]="name one" \
+  [value]="value one"
+)
+
+declare -A two
+two=(\
+  [name]="name two" \
+  [value]="value two"
+)
+
+FOREACH_VARIABLES=(one two)

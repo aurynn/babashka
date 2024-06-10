@@ -55,6 +55,15 @@ system.file.template() {
     _variables="${_variables} -s=$var";
   done
   
+  # Find all the Mo helpers so we can inject them as sources
+  # Assumes, based on using the default installer, that any helpers
+  #   will be in /etc/babashka/helpers/mo.
+  # TODO: Make this configurable?
+  local __helpers=""
+  for __helper in $(find /etc/babashka/helpers/mo -name "*.sh"); do
+    __helpers="${__helpers} -s=${__helper}"
+  done
+  
   function is_met() {
     # Basic existence and mode settings
     ! [[ -e $_file_name ]] && return 1
@@ -77,12 +86,12 @@ system.file.template() {
     # Okay so if we want to support multiple variables files,
     # we need to force $_variables into an array? I think?
 
-    /usr/bin/mo --allow-function-arguments ${_variables} $_template | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
     # Overwrite the file
-    /usr/bin/mo --allow-function-arguments ${_variables} $_template | $__babashka_sudo tee $_file_name
+    /usr/bin/mo --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
     [[ $_mode != "" ]] && $__babashka_sudo chmod $_mode $_file_name
     [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
