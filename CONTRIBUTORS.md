@@ -2,3 +2,5 @@
   - All initial work
 - @aurynn
   - Everything else so far
+- @tests-always-included
+  - The `babashka.mo.foreach` function in [helpers/babashka_mo.sh], taken from the Mo examples.
