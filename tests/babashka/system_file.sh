@@ -1,6 +1,8 @@
 system_file_contents() {
   # system.file /tmp/test_file_contents -c "hello world"
-  system.file /tmp/test_file_contents -c "hello, world" -o vagrant
+  system.file /tmp/test_file_contents \
+    -c "hello, world" \
+    -o vagrant
 }
 
 system_file_source() {

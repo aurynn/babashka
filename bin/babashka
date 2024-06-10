@@ -127,6 +127,10 @@ function __babashka_find_deps_from_path() {
         # scanned
         return
     fi
+    if [ $(basename "$1") = ".git" ] && -d $1; then 
+        # Don't scan git directories, obviously
+        return
+    fi
     if [ -e "$1/.babashka_no_recurse" ]; then
         find -L "$1" -maxdepth 1 -type f -iname "*.${2:-sh}" 
     else
