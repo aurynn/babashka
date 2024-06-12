@@ -85,13 +85,17 @@ system.file.template() {
     
     # Okay so if we want to support multiple variables files,
     # we need to force $_variables into an array? I think?
+    
+    # -u: fail on unset variables
+    # -x: fail when functions return nonzero status codes
+    # -f: fail if files don't exist
 
-    /usr/bin/mo --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo diff $_file_name -
+    /usr/bin/mo -u -x --fail-on-file --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo diff $_file_name -
   }
   function meet() {
 
     # Overwrite the file
-    /usr/bin/mo --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo tee $_file_name
+    /usr/bin/mo -u -x --fail-on-file --allow-function-arguments ${__helpers} ${_variables} $_template | $__babashka_sudo tee $_file_name
     # Change these settings, if needed
     [[ $_mode != "" ]] && $__babashka_sudo chmod $_mode $_file_name
     [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
