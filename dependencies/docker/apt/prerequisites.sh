@@ -1,3 +1,16 @@
+docker.prerequisites() {
+  case `lsb_release -cs` in
+    focal)
+      system.package apt-transport-https
+      ;;
+    *)
+      # Apparently this is no longer needed?
+      ;;
+  
+  esac
+  
+}
+
 docker.prerequisites.skopeo() {
   case `lsb_release -cs` in
     focal)
