@@ -1,5 +1,5 @@
 docker.packages() {
-  system.package apt-transport-https
+  # system.package apt-transport-https
   system.package ca-certificates
   system.package curl
   system.package software-properties-common
@@ -37,6 +37,7 @@ docker.dns.enable() {
 
 docker.install() {
   requires docker.packages
+  requires docker.prerequisites
   requires docker.repo
   system.package containerd.io
   system.package docker-ce
