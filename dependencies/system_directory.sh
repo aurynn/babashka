@@ -14,8 +14,11 @@ function system.directory() {
   # Reset the option parsing
   unset OPTIND
   unset OPTARG
-  __babashka_log "system.directory $_directory"
+  __babashka_log "== system.directory $_directory"
   # TODO: Support not-Linux?
+  function get_id() {
+    echo "${_directory}"
+  }
   function is_met() {
     if ! [[ -d $_directory ]]; then
       return 1

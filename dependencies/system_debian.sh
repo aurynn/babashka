@@ -42,7 +42,7 @@ function system.debian.repo.custom() {
   unset OPTIND
   unset OPTARG
   __funcname=${FUNCNAME[0]}
-  __babashka_log "${FUNCNAME[0]} $_repo_name"
+  __babashka_log "== ${FUNCNAME[0]} $_repo_name"
   _gpg_key_path=/usr/share/keyrings/${_repo_name}-archive-keyring.gpg
   _repo_path=/etc/apt/sources.list.d/${_repo_name}.list
   
@@ -64,6 +64,10 @@ function system.debian.repo.custom() {
   else
     _keyfile=$key
   fi
+  
+  function get_id() {
+    echo "${_repo_name}"
+  }
   
   function is_met() {
     # and the apt repo on-disk is up-to-date? Hmm.

@@ -1,6 +1,6 @@
 function system.directory.git() {
   local _directory=$1; shift;
-  __babashka_log "${FUNCNAME[0]} $_directory"
+  __babashka_log "== ${FUNCNAME[0]} $_directory"
 
   # Fetch a repo from git
   while getopts "o:g:m:s:" opt; do
@@ -24,6 +24,9 @@ function system.directory.git() {
     __babashka_fail "${FUNCNAME[0]} $_directory: Git source must be set with -s"
     exit 1
   fi
+  function get_id() {
+    echo "${_directory}"
+  }
   function is_met() {
     if ! [[ -e $_directory ]]; then
       return 1 # the directory doesn't exist, so, just go

@@ -33,7 +33,7 @@ system.file.template() {
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_file_name"
+  __babashka_log "== ${FUNCNAME[0]} $_file_name"
   # Ughhhhh this is wrong
   # Do I need a config file for this?
   if ! [[ -e /usr/bin/mo ]]; then
@@ -63,6 +63,10 @@ system.file.template() {
   for __helper in $(find /etc/babashka/helpers/mo -name "*.sh"); do
     __helpers="${__helpers} -s=${__helper}"
   done
+  
+  function get_id() {
+    echo "${_file_name}"
+  }
   
   function is_met() {
     # Basic existence and mode settings
@@ -101,5 +105,5 @@ system.file.template() {
     [[ $_owner != "" ]] && $__babashka_sudo chown $_owner $_file_name
     [[ $_group != "" ]] && $__babashka_sudo chgrp $_group $_file_name
   }
-  process
+  process "${FUNCNAME[0]}" "$_file_name"
 }

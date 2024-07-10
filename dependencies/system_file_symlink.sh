@@ -6,7 +6,7 @@ function system.file.symlink() {
   local _source=$1; shift
   local _dest=$1; shift
 
-  __babashka_log "system.file.symlink ${_source} ${_dest}"
+  __babashka_log "== system.file.symlink ${_source} ${_dest}"
 
   # Source and dest should be absolute paths, not relative
   for _path in $_source $_dest; do
@@ -18,6 +18,11 @@ function system.file.symlink() {
         ;;
     esac
   done
+  
+  function get_id() {
+    # hmmm
+    echo "${_source}:${_dest}"
+  }
 
   is_met() {
     [[ -e ${_dest} && -L ${_dest} ]] && \

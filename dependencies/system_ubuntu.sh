@@ -8,7 +8,10 @@ system.ubuntu.repository.official() {
   # TODO: Add a "-d" flag or something that removes the repository
   #   instead of just adding it
   requires system.ubuntu.package.add-apt-repository
-  __babashka_log "${FUNCNAME[0]} ${_official_repository}"
+  __babashka_log "== ${FUNCNAME[0]} ${_official_repository}"
+  function get_id() {
+    echo "${_official_repository}"
+  }
   function is_met() {
     grep -rhE ^deb /etc/apt/sources.list* \
       | grep "ubuntu" \

@@ -1,11 +1,15 @@
 docker.volume.present() {
   local _volume=$1; shift
-  __babashka_log "${FUNCNAME[0]} $_volume"
+  __babashka_log "== ${FUNCNAME[0]} $_volume"
   # this needs to verify that Docker is, in fact, installed
   if ! [[ -e /usr/bin/docker ]] && ! [[ -x /usr/bin/docker ]]; then
     # Error out, because we don't have Docker installed
     __babashka_fail "Docker is not installed"
   fi
+  
+  function get_id() {
+    echo "${_volume}"
+  }
 
   function is_met() {
     HASH=$($__babashka_sudo /usr/bin/docker volume ls -q -f "name=${_volume}")
@@ -22,13 +26,16 @@ docker.volume.present() {
 
 docker.volume.absent() {
   local _volume=$1; shift
-  __babashka_log "${FUNCNAME[0]} $_volume"
+  __babashka_log "== ${FUNCNAME[0]} $_volume"
   # this needs to verify that Docker is, in fact, installed
   if ! [[ -e /usr/bin/docker ]] && ! [[ -x /usr/bin/docker ]]; then
     # Error out, because we don't have Docker installed
     __babashka_fail "Docker is not installed"
   fi
-
+  
+  function get_id() {
+    echo "${_volume}"
+  }
   function is_met() {
     HASH=$($__babashka_sudo /usr/bin/docker volume ls -q -f "name=${_volume}")
     if [[ "$HASH " != " " ]]; then

@@ -2,17 +2,22 @@
 
 __babashka_trace=no
 __babashka_output_stream=/dev/null
+__babashka_dry_run=no
+
+declare -A __babashka_dirty
 
 __babashka_usage() {
-    echo "usage: babashka [-v] [-s] [-f] [-x] <dep name>" >&2
-    echo "  -s : use sudo if required"               >&2
-    echo "  -f : force operations"                   >&2
-    echo "  -x : trace mode (debug)"                 >&2
-    echo "  -v : verbose mode"                       >&2
+    echo "usage: babashka [-v] [-s] [-f] [-x] [-d <directory>] <dep name>"  >&2
+    echo "  -d <directory> : search a custom directory"                     >&2
+    echo "  -s : use sudo if required"                                      >&2
+    echo "  -f : force operations"                                          >&2
+    echo "  -x : trace mode (debug)"                                        >&2
+    echo "  -y : dry-run, don't attempt to converge"                        >&2
+    echo "  -v : verbose mode"                                              >&2
     exit 1
 }
 
-while getopts "vfxsd:" opt; do
+while getopts "vfxsyd:" opt; do
     case $opt in
         x)
             __babashka_trace=yes
@@ -31,6 +36,9 @@ while getopts "vfxsd:" opt; do
             ;;
         v)
             __babashka_output_stream="/dev/stderr"
+            ;;
+        y)
+            __babashka_dry_run="yes"
             ;;
         \?)
             __babashka_usage
@@ -61,8 +69,26 @@ unmeetable() {
 }
 function process() {
     if ! process_is_met; then
-        process_meet
-        process_is_met || __babashka_fail "dependency didn't converge"
+        # Check if get_id is declared, so that we can log this in the 
+        # __babashka_dirty array
+        if type get_id &> /dev/null; then
+            # The function we're in defined a get_id feature, so we can mark this
+            # as a dirtied element so that later things can trigger on it
+            # if they like.
+            local __id=$(get_id)
+            __babashka_dirty["${FUNCNAME[1]}:${__id}"]="1"
+        fi
+        if [ "$__babashka_dry_run" = "no" ]; then
+            process_meet
+            process_is_met || __babashka_fail "dependency didn't converge"
+        else
+            __babashka_log '  `- dry run, skipping...'
+        fi
+    fi
+    # If get_id exists we want to unset it so that we don't get
+    # odd behaviours across invocations where it's not yet implemented.
+    if type get_id &> /dev/null; then
+        unset -f get_id
     fi
 }
 
@@ -81,9 +107,18 @@ function process_meet() {
     __babashka_log "=> $st"
 }
 
+function on_change() {
+    # If a specific thing got dirtied, then we can return true to that.
+    [[ -v __babashka_dirty["$1"] ]]
+}
+
+## Allow for functions to declare other functions as requirements
+
 function requires() {
     __babashka_invoke "$1"
 }
+
+### Need to spawn a subshell for this one.
 
 function requires_nested() {
     ( __babashka_invoke "$1" ) || exit 1

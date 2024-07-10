@@ -9,7 +9,10 @@ postgres.database.create() {
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_database"
+  __babashka_log "== ${FUNCNAME[0]} $_database"
+  function get_id() {
+    echo "${_database}"
+  }
   function is_met() {
 
     /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "SELECT 1 FROM pg_database WHERE datname='${_database}';" | grep -q 1
@@ -42,7 +45,10 @@ postgres.database.create() {
 
 postgres.database.absent() {
   local _database=$1; shift
-  __babashka_log "${FUNCNAME[0]} $_database"
+  __babashka_log "== ${FUNCNAME[0]} $_database"
+  function get_id() {
+    echo "${_database}"
+  }
   function is_met() {
 
     /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "SELECT 1 FROM pg_database WHERE datname='${_database}';" | grep -q 1

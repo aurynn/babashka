@@ -1,7 +1,7 @@
 function system.group() {
   _group_name=$1; shift
 
-  __babashka_log "${FUNCNAME[0]} $_group_name"
+  __babashka_log "== ${FUNCNAME[0]} $_group_name"
   while getopts "g:" opt; do
     case "$opt" in
       # echoing through xargs trims whitespace
@@ -12,6 +12,9 @@ function system.group() {
   # Reset the option parsing
   unset OPTIND
   unset OPTARG
+  function get_id() {
+    echo "${_group_name}"
+  }
   function is_met() {
     if ! getent group $_group_name; then
       return 1
@@ -61,10 +64,15 @@ function system.user() {
   # Reset the option parsing
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_user_name"
+  __babashka_log "== ${FUNCNAME[0]} $_user_name"
   if [[ is_system == true ]]; then
     unset $homedir
   fi
+  
+  function get_id() {
+    echo "${_user_name}"
+  }
+  
   function is_met() {
     # User exists?
     getent passwd ${_user_name} || return 1
@@ -150,12 +158,16 @@ system.user.groups() {
   # Reset the option parsing
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_user_name"
+  __babashka_log "== ${FUNCNAME[0]} $_user_name"
   getent passwd ${_user_name} > /dev/null || __babashka_fail "${FUNCNAME[0]}: User $_user_name does not exist."
   
   for group in ${_groups[@]}; do
     getent group $group > /dev/null || __babashka_fail "${FUNCNAME[0]}: Group $group does not exist."
   done
+  
+  function get_id() {
+    echo "${_user_name}"
+  }
   
   function is_met() {
     

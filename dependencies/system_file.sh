@@ -25,10 +25,14 @@ function system.file() {
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_file_name"
+  __babashka_log "== ${FUNCNAME[0]} $_file_name"
+  
+  function get_id() {
+    echo "${_file_name}"
+  }
 
   function is_met() {
-    __babashka_log "file name: $_file_name"
+    # __babashka_log "file name: $_file_name"
     ! [[ -e $_file_name ]] && return 1
 
     if [[ $group != "" ]]; then
@@ -83,13 +87,15 @@ function system.file.line() {
   while getopts "c:" opt; do
     case "$opt" in
       c)
-        # Why do I do this everywhere?
         local _contents="$OPTARG";;
     esac
   done
   unset OPTIND
   unset OPTARG
-  __babashka_log "${FUNCNAME[0]} $_file $_contents"
+  __babashka_log "== ${FUNCNAME[0]} $_file $_contents"
+  function get_id() {
+    echo "${_file}"
+  }
   function is_met() {
     # Check the beginning of the line
     $__babashka_sudo grep "^$_contents" $_file
@@ -103,10 +109,13 @@ function system.file.line() {
 # Ensure a file does not exist
 function system.file.absent() {
   local _file=$1; shift;
-  __babashka_log "${FUNCNAME[0]} $_file"
+  __babashka_log "== ${FUNCNAME[0]} $_file"
   if [[ -d $_file ]]; then
     __babashka_fail "ERROR: $_file is a directory"
   fi
+  function get_id() {
+    echo "${_file}"
+  }
   function is_met() {
     ! [[ -e $_file ]];
   }

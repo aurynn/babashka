@@ -14,7 +14,10 @@ postgres.user.create() {
   unset OPTIND
   unset OPTARG
 
-  __babashka_log "${FUNCNAME[0]} $_user"
+  __babashka_log "== ${FUNCNAME[0]} $_user"
+  function get_id() {
+    echo "${_user}"
+  }
   function is_met() {
     /usr/bin/sudo -iu postgres /usr/bin/psql -tAc "select 1 from pg_roles where rolname='$_user';" | grep -q 1
     local _user_exists=$?
@@ -65,7 +68,10 @@ postgres.user.create() {
 
 postgres.user.absent() {
   local _user=$1; shift
-  __babashka_log "${FUNCNAME[0]} $_user"
+  __babashka_log "== ${FUNCNAME[0]} $_user"
+  function get_id() {
+    echo "${_user}"
+  }
   function is_met() {
     /usr/bin/sudo -iu postgres /usr/bin/psql -tAc \
       "select 1 from pg_roles where rolname='$_user';" \
