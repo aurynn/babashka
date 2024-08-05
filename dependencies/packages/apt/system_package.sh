@@ -12,7 +12,7 @@ function system.package() {
    }
    function meet() {
      [ -n "$__babushka_force" ] && apt_flags="${apt_flags} -f --force-yes"
-     DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq install $apt_flags ${apt_pkg:-$_package_name}
+     DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -o DPkg::Lock::Timeout=60 -yqq install $apt_flags ${apt_pkg:-$_package_name}
    }
   process
 }
@@ -30,8 +30,8 @@ function system.package.absent() {
    }
    function meet() {
     [ -n "$__babushka_force" ] && apt_flags="${apt_flags} -f --force-yes"
-    DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq remove $apt_flags ${apt_pkg:-$_package_name}
-    DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -yqq autoremove
+    DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -o DPkg::Lock::Timeout=60 -yqq remove $apt_flags ${apt_pkg:-$_package_name}
+    DEBIAN_FRONTEND=noninteractive $__babashka_sudo apt-get -o DPkg::Lock::Timeout=60 -yqq autoremove
    }
   process
 }
