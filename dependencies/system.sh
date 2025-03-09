@@ -30,7 +30,7 @@ function system.group() {
     if getent group $_group_name; then
       $__babashka_sudo groupmod -g $gid $_group_name
     else
-      $__babashka_sudo addgroup $_group_name ${gid:+-g $gid}
+      $__babashka_sudo addgroup $_group_name ${gid:+-gid $gid}
     fi
   }
   process
