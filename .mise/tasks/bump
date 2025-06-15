@@ -1,0 +1,32 @@
+#!/bin/bash
+#MISE description="Bump current version"
+
+set -euo pipefail
+
+# TODO: Change this to an environment variable?
+VERSION_FILE="VERSION"
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 <bump_type>"
+  echo "Bump types: major | minor | patch | premajor | preminor | prepatch | prerelease"
+  exit 1
+fi
+
+bump_type="$1"
+
+if [[ ! -f "$VERSION_FILE" ]]; then
+  echo >&2 "Error: $VERSION_FILE file not found"
+  exit 1
+fi
+
+current_version=$(<"$VERSION_FILE")
+
+if ! semver validate "$current_version" >/dev/null; then
+  echo >&2 "Error: Current version '$current_version' is not valid semver"
+  exit 1
+fi
+
+new_version=$(semver bump "$bump_type" "$current_version")
+
+echo "$new_version" > "$VERSION_FILE"
+echo "Bumped version: $current_version → $new_version"

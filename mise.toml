@@ -1,0 +1,6 @@
+[tasks]
+version = "cat VERSION"
+
+[tools]
+semver = "latest"
+shellcheck = "latest"

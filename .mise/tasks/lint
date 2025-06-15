@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+#MISE description="Run the linter"
+
+# Currently just return with success since we don't have any linting set up.
+
+shellcheck -s bash bin/babashka
