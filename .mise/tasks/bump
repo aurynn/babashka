@@ -1,0 +1,50 @@
+#!/bin/bash
+#MISE description="Bump current version"
+
+set -euo pipefail
+
+# TODO: Change this to an environment variable?
+VERSION_FILE="VERSION"
+
+usage() {
+  echo "Usage: mise run bump <bump_type>"
+  echo "Bump types: major | minor | patch | premajor | preminor | prepatch | prerelease"
+  exit 1
+}
+
+if [[ $# -ne 1 ]]; then
+  usage
+fi
+
+bump_type="$1"
+
+case "$bump_type" in
+  # These are the bump types that semver supports
+  major|minor|patch|premajor|preminor|prepatch|prerelease)
+    ;;
+  *)
+    echo >&2 "Error: $bump_type not a valid bump type"
+    # print a newline to separate from the usage printout
+    echo >&2 ""
+    usage
+    ;;
+esac
+
+if [[ ! -f "$VERSION_FILE" ]]; then
+  echo >&2 "Error: $VERSION_FILE file not found"
+  exit 1
+fi
+
+current_version=$(cat "$VERSION_FILE")
+
+if ! semver validate "$current_version" > /dev/null; then
+  # TODO
+  # Should this echo the semver validation output?
+  echo >&2 "Error: Current version '$current_version' is not valid semver"
+  exit 1
+fi
+
+new_version=$(semver bump "$bump_type" "$current_version")
+
+echo "$new_version" > "$VERSION_FILE"
+echo "Bumped version: $current_version -> $new_version"
