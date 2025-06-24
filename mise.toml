@@ -2,5 +2,6 @@
 version = "cat VERSION"
 
 [tools]
+bats = "latest"
 semver = "latest"
 shellcheck = "latest"

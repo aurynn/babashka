@@ -5,6 +5,9 @@ __babashka_output_stream=/dev/null
 __babashka_dry_run=no
 
 declare -A __babashka_dirty
+# Make system info a global value so that we can query it using the 
+#   system::info commands
+declare -gA __babashka_system_info
 
 __babashka_usage() {
     echo "usage: babashka [-v] [-s] [-f] [-x] [-d <directory>] <dep name>"  >&2
@@ -17,46 +20,52 @@ __babashka_usage() {
     exit 1
 }
 
-while getopts "vfxsyd:" opt; do
-    case $opt in
-        x)
-            __babashka_trace=yes
-            ;;
-        s)
-        # TODO:
-        # Hardcode the sudo path, since this is potentially a bit dicey
-            __babashka_sudo="sudo"
-            ;;
-        f)
-            __babushka_force="yes"
-            ;;
-        d)
-            # Set a custom directory to also source in
-            __babashka_directory=$(echo $OPTARG | xargs)
-            ;;
-        v)
-            __babashka_output_stream="/dev/stderr"
-            ;;
-        y)
-            __babashka_dry_run="yes"
-            ;;
-        \?)
-            __babashka_usage
-            ;;
-    esac
-done
-
-((shift_value = $OPTIND - 1))
-shift $shift_value
-unset OPTIND
-
-if [ $__babashka_trace = "yes" ]; then
-    set -x
-fi
+__bb_parse_main_args() {
+  while getopts "vfxsyd:" opt; do
+      case $opt in
+          x)
+              __babashka_trace=yes
+              ;;
+          s)
+          # TODO:
+          # Hardcode the sudo path, since this is potentially a bit dicey
+          # TODO:
+          # Is this even a good idea? Like, I think we should make the converge
+          #   either run _as_ root, or not be able to do sudo operations itself.
+          #   None of this ... half-measure stuff.
+              __babashka_sudo="sudo"
+              ;;
+          f)
+              __babushka_force="yes"
+              ;;
+          d)
+              # Set a custom directory to also source in
+              __babashka_directory="$(echo "$OPTARG" | xargs)"
+              ;;
+          v)
+              __babashka_output_stream="/dev/stderr"
+              ;;
+          y)
+              __babashka_dry_run="yes"
+              ;;
+          \?)
+              __babashka_usage
+              ;;
+      esac
+  done
+  
+  ((shift_value = OPTIND - 1))
+  shift $shift_value
+  unset OPTIND
+  
+  if [ $__babashka_trace = "yes" ]; then
+      set -x
+  fi
+}
 
 __babashka_log() {
-    printf "%*s"  "$__babashka_current_indent" 1>&2
-    printf "%s\n" "$@" 1>&2
+    printf "%*s"  "$__babashka_current_indent" "$@" 1>&2
+    # printf "%s\n" "$@" 1>&2
 }
 
 __babashka_fail() {
@@ -67,7 +76,8 @@ __babashka_fail() {
 unmeetable() {
     __babashka_fail "$@"
 }
-function process() {
+
+process() {
     if ! process_is_met; then
         # Check if get_id is declared, so that we can log this in the 
         # __babashka_dirty array
@@ -75,7 +85,8 @@ function process() {
             # The function we're in defined a get_id feature, so we can mark this
             # as a dirtied element so that later things can trigger on it
             # if they like.
-            local __id=$(get_id)
+            local __id
+            __id="$(get_id)"
             __babashka_dirty["${FUNCNAME[1]}:${__id}"]="1"
         fi
         if [ "$__babashka_dry_run" = "no" ]; then
@@ -92,7 +103,7 @@ function process() {
     fi
 }
 
-function process_is_met() {
+process_is_met() {
     __babashka_log '`- is met?'
     is_met > $__babashka_output_stream
     st=$?
@@ -100,36 +111,39 @@ function process_is_met() {
     return $st
 }
 
-function process_meet() {
+process_meet() {
     __babashka_log "=> meet "
     meet > $__babashka_output_stream
     st=$?
     __babashka_log "=> $st"
 }
 
-function on_change() {
-    # If a specific thing got dirtied, then we can return true to that.
-    [[ -v __babashka_dirty["$1"] ]]
+on_change() {
+  # If a specific thing got dirtied, then we can return true to that.
+  [[ -v __babashka_dirty["$1"] ]]
 }
 
 ## Allow for functions to declare other functions as requirements
 
-function requires() {
-    __babashka_invoke "$1"
+requires() {
+  __babashka_invoke "$1"
 }
 
 ### Need to spawn a subshell for this one.
 
-function requires_nested() {
+requires_nested() {
     ( __babashka_invoke "$1" ) || exit 1
 }
 
 # $1 - dep name to invoke
-function __babashka_invoke() {
+__babashka_invoke() {
     (( __babashka_current_indent = __babashka_current_indent + 1 ))
     __babashka_log "-> $1"
+    
+    # Is eval the right way to do this?
+    # Hmm.
     eval "$1"
-
+    
     # that makes the return code 1 even if babashka succeeds, because arithmetic
     # expressions behave differently than success/error of commands:
     # http://wiki.bash-hackers.org/syntax/arith_expr#truth
@@ -139,11 +153,19 @@ function __babashka_invoke() {
     # failed to converge).
     (( __babashka_current_indent = __babashka_current_indent - 1 )) || true
 }
-function __babashka_load_deps() {
+__babashka_load_deps() {
     # Rename directories to be a bit more clear what they're for
     # Include a system-level Babashka repository for common packages and stuff
-    for path in babashka/ babashka/dependencies/ /etc/babashka/dependencies /etc/babashka/helpers ${__babashka_directory:+$__babashka_directory}; do
-        if [ -d $path ]; then
+    # Always load helpers first
+    # Assumes that our main config directory is going to be /etc which may not
+    #   actually be true, but is for my purposes right now, so that's what
+    #   we're gonna get.
+    # TODO:
+    #  - Make this a default
+    #  - Add a /etc/defaults/babashka that gets read in to provide these 
+    #       variables instead of hardcoding them here
+    for path in /etc/babashka/helpers ./babashka/ /etc/babashka/dependencies "${__babashka_directory:+$__babashka_directory}"; do
+        if [ -d "$path" ]; then
             __babashka_load_deps_from_path "$path"
         fi
     done
@@ -151,22 +173,25 @@ function __babashka_load_deps() {
 
 # $1 - path to search over
 # [$2] - pattern to match for deps
-function __babashka_find_deps_from_path() {
+__babashka_find_deps_from_path() {
     # Use -L to follow links
     # So we're looking for a special file, the "don't recurse" file, to keep
     # Babashka from walking the whole tree to look for shell files to load.
     # We also want to skip any directories named "files", since that's the default
     # location for files being used by configuration management to live.
-    if [ $(basename "$1") = "files" ] && -d $1; then 
+    if [[ "$(basename "$1")" == "files" ]] && [[ -d "$1" ]]; then 
         # Skip this, because it's likely a files directory and shouldn't be 
         # scanned
         return
     fi
-    if [ $(basename "$1") = ".git" ] && -d $1; then 
+    if [[ "$(basename "$1")" == ".git" ]] && [[ -d "$1" ]]; then 
         # Don't scan git directories, obviously
         return
     fi
-    if [ -e "$1/.babashka_no_recurse" ]; then
+    # If there's a no-recurse marker here, skip the directory.
+    # This is so that we can set up our dependencies such that we have cross-
+    #   platform-ish 
+    if [ -e "${1}/.babashka_no_recurse" ]; then
         find -L "$1" -maxdepth 1 -type f -iname "*.${2:-sh}" 
     else
         find -L "$1" -type f -iname "*.${2:-sh}"
@@ -174,55 +199,186 @@ function __babashka_find_deps_from_path() {
 }
 
 # $1 - path to load deps from
-function __babashka_load_deps_from_path() {
+__babashka_load_deps_from_path() {
     for path in $(__babashka_find_deps_from_path "$1"); do
-        source $path
+        # Because this is dynamic discovery, we don't care if shellcheck can't
+        #   figure out what's being sourced.
+        # shellcheck source=/dev/null
+        source "$path"
     done
 }
-file_exists() {
-    if [ "${1:0:7}" = "hdfs://" ]; then
-        hadoop fs -test -e "$1"
-    else
-        test -f "$1"
-    fi
-}
 
-dir_exists() {
-    if [ "${1:0:7}" = "hdfs://" ]; then
-        hadoop fs -test -d "$1"
-    else
-        test -f "$1"
-    fi
-}
-
-file_mtime() {
-    if [ "${1:0:7}" = "hdfs://" ]; then
-        echo $(( $(hadoop fs -stat %Y "$1") / 1000 ))
-    else
-        stat -c %Y "$1"
-    fi
-}
-
-file_is_newer() {
-    target_mtime=$(file_mtime "$1")
-    shift
-    for f in "$@"; do
-        mtime=$(file_mtime "$f")
-        if [ $mtime -gt $target_mtime ]; then
-            return 1
-        fi
-    done
-    return 0
-}
-
-function __babashka_main() {
-    if [ $# -eq 1 ]; then
+__babashka_main() {
+    # if [ $# -eq 1 ]; then
+    # Bash-specific version, but this is a Bash tool, so that doesn't matter
+    #   overly much.
+    if (( $# == 1 )); then
         __babashka_invoke "$1"
     else
         __babashka_usage
     fi
 }
 
+# Populate our system information array before we load deps, since
+#   we expect the deps to be able to make use of those functions to determine
+#   if they should load or not.
+
+__babashka_parse_etc_os_release() {
+  local key
+  local val
+  
+  while IFS='=' read -r key val; do
+    # Skip empty lines or comments
+    [[ -z "$key" || "$key" == \#* ]] && continue
+    echo "$key"
+    echo "$val"
+    
+    # Remove surrounding quotes (if any)
+    val="${val%\"}"
+    val="${val#\"}"
+    # add to the associative array, so it's usable by the relevant helper
+    #   functions
+    __babashka_system_info["$key"]="$val"
+  done < /etc/os-release
+}
+
+__babashka_parse_sw_vers() {
+    local key
+    local val
+    
+    while IFS=":" read -r key val; do
+        case "$key" in
+            ProductName)
+                # Unlikely that they'll change it, but, you know, they might.
+                # Should be "macOS".
+                __babashka_system_info["NAME"]="$val"
+                ;;
+            ProductVersion)
+                __babshka_system_info["VERSION_ID"]="$val"
+                ;;
+            *)
+            # Just ignore the rest, really
+            ;;
+        esac
+    done < <(sw_vers)
+}
+
+__babashka_get_macos_codename() {
+  # pull product version out of sw_vers 
+  local version="${1:-$(sw_vers -productVersion)}"
+  local major
+  local minor
+  local _
+  IFS='.' read -r major minor _ <<< "$version"
+  
+  # It's not like we'll ever use anything older than, say, Catalina for any
+  #   of this, but it's helpful to have a mapping for all of it.
+  case "$major.$minor" in
+    10.0) echo "Cheetah" ;;
+    10.1) echo "Puma" ;;
+    10.2) echo "Jaguar" ;;
+    10.3) echo "Panther" ;;
+    10.4) echo "Tiger" ;;
+    10.5) echo "Leopard" ;;
+    10.6) echo "Snow Leopard" ;;
+    10.7) echo "Lion" ;;
+    10.8) echo "Mountain Lion" ;;
+    10.9) echo "Mavericks" ;;
+    10.10) echo "Yosemite" ;;
+    10.11) echo "El Capitan" ;;
+    10.12) echo "Sierra" ;;
+    10.13) echo "High Sierra" ;;
+    10.14) echo "Mojave" ;;
+    10.15) echo "Catalina" ;;
+    11*) echo "Big Sur" ;;
+    12*) echo "Monterey" ;;
+    13*) echo "Ventura" ;;
+    14*) echo "Sonoma" ;;
+    15*) echo "Sequoia" ;;
+    # We don't know if the next version will actually be 26 or not yet.
+    #   Guess we'll find out when Apple decides to tell us?
+    16*|26*) echo "Tahoe" ;;
+    # "Unknown" is a good default
+    *) echo "Unknown" ;;
+  esac
+}
+
+__babashka_macos_pretty_name() {
+  local version="${1:-$(sw_vers -productVersion)}"
+  local major
+  local minor
+  local _ 
+  IFS='.' read -r major minor _ <<< "$version"
+  
+  local codename
+  codename="$(__babashka_get_macos_codename "$version")"
+  
+  if [[ $codename == "Unknown" ]]; then
+    echo "Unknown macOS"
+  elif (( major == 10 )); then
+    echo "Mac OS X $version $codename"
+  else
+    echo "macOS $major $codename"
+  fi
+}
+
+__babashka_load_system_info() {
+  ## TODO
+  ##  - Support for other OS'es beyond Linux and macOS
+  ##  - Disks and available space
+  ##  - 
+    case "$(uname -s)" in
+        Linux)
+            # parse /etc/os-release since we can be reasonably assured that
+            #   it exists.
+            __babashka_parse_etc_os_release
+            __babashka_system_info["CPUS"]="$(lscpu -p | grep -E -v '^#' | sort -u -t, -k 2,4 | wc -l)"
+            __babashka_system_info["LOGICAL_CPUS"]="$(nproc --all)"
+            # Is this a stable value?
+            __babashka_system_info["MEMORY"]="$(free -g | awk '/^Mem:/{print $2}')"
+            # TODO
+            #  - A way to get performance and efficiency core information into here.
+            #      As I don't have a machine with a performance/efficiency core
+            #      split that's running Linux, I can't test any means of doing this.
+        ;;
+        Darwin)
+            # so /etc/os-release does not exist on macOS, because, why would it.
+            # Also, Apple switched from Mac OS X to macOS with 10.15 -> 11.
+            
+            __babashka_system_info["ID"]="macos"
+            __babashka_system_info["VERSION_CODENAME"]=__babashka_get_macos_codename
+            __babashka_system_info["PRETTY_NAME"]=__babashka_macos_pretty_name
+            __babashka_parse_sw_vers
+            
+            local tmp_memsize
+            __babashka_system_info["CPUS"]="$(sysctl -n hw.physicalcpu)"
+            __babashka_system_info["LOGICAL_CPUS"]="$(sysctl -n hw.logicalcpu)"
+            __babashka_system_info["PERFORMANCE_CORES"]="$(sysctl -n hw.perflevel0.physicalcpu)"
+            __babashka_system_info["EFFICIENCY_CORES"]="$(sysctl -n hw.perflevel1.physicalcpu)"
+            local tmp_memsize
+            tmp_memsize="$(sysctl -n hw.memsize)"
+            __babashka_system_info["MEMORY"]=$((tmp_memsize / 1024 / 1024 ))
+            ;;
+        *)
+          echo "Unknown system"
+          exit 1
+            ;;
+    esac
+    __babashka_system_info["ARCH"]="$(uname -m)"
+    __babashka_system_info["NODENAME"]="$(uname -n)"
+}
+
+# Load system info
+__babashka_load_system_info
+# load our dependency tree, including our helpers
 __babashka_load_deps
 
-__babashka_main "$@"
+# ifmain pragma
+# Allows tests to source this file in in order to have access to the entirety
+#   of provided system information.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  echo "is main"
+    __bb_parse_main_args "$@"
+    # Converge. CONVERGE. COMPLY.
+    __babashka_main "$@"
+fi
