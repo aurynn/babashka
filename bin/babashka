@@ -377,7 +377,6 @@ __babashka_load_deps
 # Allows tests to source this file in in order to have access to the entirety
 #   of provided system information.
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  echo "is main"
     __bb_parse_main_args "$@"
     # Converge. CONVERGE. COMPLY.
     __babashka_main "$@"
