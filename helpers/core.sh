@@ -11,6 +11,12 @@ bb::core::element_in_array() {
   return 1
 }
 
+in_array() {
+  bb::core::element_in_array "$@"
+}
+
+##
+
 bb::core::normalise_string() {
   local raw="$1"
   # Collapse all whitespace to single spaces
@@ -20,6 +26,16 @@ bb::core::normalise_string() {
   value="${value%"${value##*[![:space:]]}"}" # ... and trailing
   echo "$value"
 }
+
+bb::core::normalize_string() {
+  bb::core::normalise_string "$@"
+}
+
+normalize() {
+  bb::core::normalise_string "$@"
+}
+
+##
 
 bb::core::casefold() {
   local raw="$1"
@@ -43,4 +59,8 @@ bb::core::casefold() {
     ARGV[1] = "";
     print tolower(str)
   }' "$raw"
+}
+
+casefold() {
+  bb::core::casefold "$@"
 }

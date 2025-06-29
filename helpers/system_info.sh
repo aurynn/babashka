@@ -1,10 +1,7 @@
 # Provides some pleasant helper functions to make fetching certain system
 #   information easier when writing configuration.
 
-system.info() {
-  system::info "$@"
-}
-
+# what if: info::system
 system::info() {
   local segment
   segment="$(bb::core::normalise_string "$1")"
@@ -39,39 +36,25 @@ system::info::test() {
   [[ -n "$to_test" ]] || return 3
   local value
   local status
-  value="$(system.info "$segment")"
+  value="$(system::info "$segment")"
   status=$?
   $status || return $status
   [[ "$value" == "$to_test" ]]
 }
 
-system.info.test() {
-  system::info::test "$@"
-}
-
 ##
 
-system.info.like() { 
-  system::info::like "$@"
-}
 system::info::like() { 
   system::info::test ID_LIKE "$1" || system::info::test ID "$1"
 }
 
 ##
 
-system.info.id() {
-  system::info::id "$@"
-}
 system::info::id() {
   system::info::test "ID" "$1"
 }
 
 ##
-
-system.info.name() {
-  system::info::name "$@"
-}
 
 system::info::name() {
   system::info::test "NAME" "$1"
@@ -79,38 +62,30 @@ system::info::name() {
 
 ##
 
-system.info.version() {
-  system::info::version "$@"
-}
-
 system::info::version() {
   system::info::test "VERSION_ID" "$1"
 }
 
 ##
 
-system.info.codename() {
-  # what system version are we?
-  # when would this matter?
-  # I mean, sometimes?
-  system::info::test "VERSION_CODENAME" "$1"
-}
-
-##
-
-system.info.arch() {
-  system::info::arch "$@"
-}
 system::info::arch() {
   system::info::test "ARCH" "$1"
 }
 
 ##
 
-system.info.nodename() {
-  system::info::nodename "$@"
-}
-
 system::info::nodename() {
   system::info::test "NODENAME" "$1"
+}
+
+##
+
+system::info::cpus() {
+  system::info::test "CPUS" "$1"
+}
+
+##
+
+system::info::memory() {
+  system::info::test "MEMORY" "$1"
 }

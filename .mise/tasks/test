@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+#MISE description="Run the test  suite"
+
+bats -r tests/bats

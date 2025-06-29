@@ -5,12 +5,12 @@ setup_file() {
   DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
   load "${DIR}/../../../bin/babashka"
   # load the babashka core functions
-  . "${DIR}/../../../helpers/01-core.sh"
+  . "${DIR}/../../../helpers/core.sh"
 }
 
 setup() {
   DIR="$( cd "$( dirname "$BATS_TEST_FILENAME" )" >/dev/null 2>&1 && pwd )"
-  . "${DIR}/../../../helpers/01-core.sh"
+  . "${DIR}/../../../helpers/core.sh"
 }
 
 @test "element_in_array detects element" {

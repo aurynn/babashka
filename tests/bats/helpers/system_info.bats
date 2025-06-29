@@ -9,7 +9,7 @@ setup() {
   # Load Babashka itself
   . "${DIR}/../../../bin/babashka"
   # load the bats helpers
-  . "${DIR}/../../../helpers/01-core.sh"
+  . "${DIR}/../../../helpers/core.sh"
   . "${DIR}/../../../helpers/system_info.sh"
 }
 
