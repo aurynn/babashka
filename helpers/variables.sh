@@ -10,8 +10,9 @@ declare -ag __KITBASH_VAR_RESOLVERS
 declare -ag __KITBASH_VAR_SECRET_RESOLVERS
 
 declare -ag __KITBASH_VAR_RESOLVERS_INIT
+declare -ag __KITBASH_SECRET_RESOLVERS_INIT
 
-declare -Ag __KITBASH_VAR_CACHE
+
 declare -g __KITBASH_LOAD_VARIABLES
 __KITBASH_LOAD_VARIABLES=0
 
@@ -31,35 +32,31 @@ info.var() {
     return 1
   }
   
-  # This is still wrong.
-  # TODO: Fix this, since it'll cause weirdness later on with variable providers that aren't "load everything" style.
-  
   log.debug "Searching for variable: '$name'"
-  if (( __KITBASH_LOAD_VARIABLES == 0 )); then
-    log.debug "kitbash loading variables..."
-    value=$(kitbash.vars.load "$name")
-    [[ -n "$value" ]] && {
-      printf '%s' "$value"
-      __KITBASH_LOAD_VARIABLES=1
+  
+  # Assume that all resolvers will handle their own caching, since trying to
+  #   overload logic here to add a cache is silly.
+  local resolver exit_code
+  for resolver in "${__KITBASH_VAR_RESOLVERS[@]}"; do
+    value=$("$resolver" "$name")
+    exit_code="$?" # Immediately capture the exit code
+    # TODO: Define error codes and use case logic to handle them here or some
+    #   sort of exception handler system eventually.
+    # ... This project is growing its own OO-style environment. Oops.
+    if [[ -n "$value" ]]; then
+      printf '%s\n' "$value"
       return 0
-    }
-  fi
-
-  # 1. Cached value
-  if [[ -n "${__KITBASH_VAR_CACHE["$name"]+x}" ]]; then
-    log.debug "info.var: cache hit for '$name'"
-    log.debug "Value: ${__KITBASH_VAR_CACHE["$name"]}"
-    printf '%s' "${__KITBASH_VAR_CACHE["$name"]}"
-    return 0
-  fi
+    fi
+  done
+  
   # 3. Default / error
   if [[ -n "$default" ]]; then
     log.debug "info.var: returning default for '$name'"
-    printf '%s' "$default"
+    printf '%s\n' "$default"
     return 0
   fi
 
-  log.error "Variable '$name' not set and no default provided"
+  log.error "Variable '$name' not found and no default provided."
   return 1
 }
 
@@ -185,6 +182,24 @@ kitbash.vars.init.register() {
     append|*)
       log.debug "Appending '${function}'"
       types.set.append __KITBASH_VAR_RESOLVERS_INIT "$function"
+      ;;
+  esac
+}
+
+kitbash.secrets.init.register() {
+  local function
+  function="$1"
+  log.debug "Registering init: '${function}'"
+  local mode
+  mode="${2:-prepend}"
+  case "$mode" in
+    prepend)
+      log.debug "Prepending '${function}'"
+      types.set.prepend __KITBASH_SECRET_RESOLVERS_INIT "$function"
+      ;;
+    append|*)
+      log.debug "Appending '${function}'"
+      types.set.append __KITBASH_SECRET_RESOLVERS_INIT "$function"
       ;;
   esac
 }

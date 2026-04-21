@@ -1,2 +1,3 @@
 GREETING=hello
+TRAILING_N=warn
 DEPARTURE=gone
