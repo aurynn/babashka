@@ -1,5 +1,8 @@
 ## Provides some core functionality for use in Babashka
 
+### Globals
+__STR_CASEFOLD_LOCALE=""
+
 bb.core.element_in_array() {
   # search for thing in array, which will now be "$@"
   # Exists to make Bash a bit more other languages
@@ -20,6 +23,13 @@ in_array() {
 types.array.exists() {
   if ! declare -p "$1" | grep -q 'declare -a'; then
     log.error "Undefined array '$1'."
+    return 1
+  fi
+}
+
+types.hash.exists() {
+  if ! declare -p "$1" | grep -q 'declare -A'; then
+    log.error "Undefined associative array '$1'."
     return 1
   fi
 }
@@ -153,11 +163,11 @@ types.assoc.copy() {
   src_name="$1"
   dst_name="$2"
   if ! declare -p "$src_name" 2>/dev/null | grep -q 'declare -A'; then
-    log.error "No such source '$src'"
+    emit error "No such source '$src'"
     return 1
   fi
   if ! declare -p "$dst_name" 2>/dev/null | grep -q 'declare -A'; then
-    log.error "No such destination '$dst'"
+    emit error "No such destination '$dst'"
     return 2
   fi
   local -n src
@@ -169,18 +179,26 @@ types.assoc.copy() {
   done
 }
 
+str.dot_to_underscore() {
+  local str
+  str="$*"
+  str="$(str.normalize "$str")"
+  str="$(str.casefold "$str")"
+  printf '%s\n' "${str//./_}"
+}
+
 ##
 ## string helpers
 ##
 
 kitbash.str.normalise() {
-  local raw="$1"
+  local raw value
+  raw="$*"
   # Collapse all whitespace to single spaces
-  local value
   value="$(printf '%s' "$raw" | tr -s '[:space:]' ' ')"
   value="${value#"${value%%[![:space:]]*}"}" # Trim leading whitespace
   value="${value%"${value##*[![:space:]]}"}" # ... and trailing
-  echo "$value"
+  printf '%s\n' "$value"
 }
 
 bb.core.normalise_string() {
@@ -195,11 +213,15 @@ normalize() {
   kitbash.str.normalise "$@"
 }
 
+str.normalize() {
+  kitbash.str.normalise "$@"
+}
+
 ##
 
 bb.core.casefold() {
-  local raw="$1"
-  local locale
+  local raw locale
+  raw="$1"
   # See if we can find a UTF-8 locale, in order to ensure a broader range of
   #   characters that can or should be folded down.
   # Doesn't handle the full range of unicode characters that *might* need to
@@ -207,13 +229,28 @@ bb.core.casefold() {
   #   management too, right?
   # Finally, fall into the basic C locale if we can't find a UTF-8 locale to
   #   use.
-  for loc in C.UTF-8 C.utf8 en_US.utf8 en_US.UTF-8 UTF-8 C; do
-    if locale -a 2>/dev/null | grep -qi "^${loc}$"; then
-      locale="$loc"
-      break
-    fi
-  done
-  
+  if [[ -z "$__STR_CASEFOLD_LOCALE" ]]; then
+    # Try to default to the standard C locale
+    __STR_CASEFOLD_LOCALE="C"
+    local locales
+    # Performance optimization, only fetch locales once instead of fetching
+    # the whole list on every cycle through the loop.
+    locales="$(locale -a 2>/dev/null)"
+    # TODO: Generate OS-specific locales that get loaded in at runtime in
+    #   order to ensure that this particular locale set isn't the only 
+    #   one we try to use.
+    for loc in C.UTF-8 C.utf8 en_US.utf8 en_US.UTF-8 UTF-8 C; do
+      if grep -qi -x -- "$loc" <<<"$locales"; then
+        # Optimization, cache the locale once across the entire run of Kitbash
+        __STR_CASEFOLD_LOCALE="$loc"
+        break
+      fi
+    done
+  fi
+  locale="$__STR_CASEFOLD_LOCALE"
+  # Shelling out to awk for this is perhaps not ideal, but it does provide
+  # somewhat better syntax for folding all capital letters down to their 
+  # lowercase equivalents in our given locale.
   LC_ALL="$locale" awk 'BEGIN {
     str = ARGV[1];
     ARGV[1] = "";
@@ -222,7 +259,10 @@ bb.core.casefold() {
 }
 
 std.casefold() {
-  bb.core.casefold "$@"
+  bb.core.casefold "$*"
+}
+str.casefold() {
+  bb.core.casefold "$*"
 }
 
 ## Load a file, relative to the callsite

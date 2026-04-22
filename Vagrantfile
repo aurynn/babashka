@@ -26,6 +26,7 @@ Vagrant.configure("2") do |config|
     sudo ln -s /vagrant/vagrant/etc/kitbash/models.d .
     sudo ln -s /vagrant/vagrant/etc/kitbash/local .
     sudo ln -s /vagrant/vagrant/etc/kitbash/variables .
+    sudo ln -s /vagrant/bin/babashka /usr/bin/kitbash
     SHELL
     v.vm.provision "shell", run: :once, name: :mise, path: "vagrant/scripts/02-mise.sh" 
   end
