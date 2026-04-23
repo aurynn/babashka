@@ -98,6 +98,7 @@ kitbash.vars.files.list0() {
   search_paths=("${search_paths[@]}" "${paths[@]}")
   unset directory
   for directory in "${search_paths[@]}"; do
+    [[ -e "$directory" && -d "$directory" ]] || continue
     log.debug "Searching path $directory"
     find -L "$directory" -maxdepth 1 -type f \( "${glob_find_query[@]}" \) -print0 | sort -znr
   done
@@ -147,8 +148,10 @@ kitbash.vars.files.model.list0() {
   
   # Generates the list of search paths
   # ${paths[@]} exists in scope because it's from our caller's scope.
-  # This is obviously really brittle and shouldn't be done.
+  # This is obviously *really* brittle and shouldn't be done.
+  # TODO: Fix this brittle-ass code.
   for directory in "${paths[@]}"; do
+    [[ -e "$directory" && -d "$directory" ]] || continue
     models_d="$directory"/"$KITBASH_MODELS_DIRECTORY_NAME"
     log.debug "Checking models directory $models_d"
     
