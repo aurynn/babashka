@@ -34,11 +34,11 @@ kitbash.vars.files.init() {
 kitbash.secrets.files.init() {
   local fn
   log.debug "Initializing secrets cache"
-  log.debug "Using ${KITBASH_SECRET_PATHS[@]}"
+  log.debug "Using ${KITBASH_SECRETS_PATHS[@]}"
   while IFS= read -r -d '' fn; do
     log.debug "reading $fn into secret cache"
     kitbash.vars.files.read_into "$fn" "__KITBASH_SECRET_FILE_CACHE"
-  done < <(kitbash.vars.files.list0 KITBASH_SECRET_PATHS)
+  done < <(kitbash.vars.files.list0 KITBASH_SECRETS_PATHS)
 }
 
 # kitbash.vars.files.general

@@ -72,7 +72,7 @@ info.var.secret() {
     log.debug "Checking resolver '$resolver'"
     val=$("$resolver" "$name")
     if [[ -n "$val" ]]; then
-      printf '%s' "$val"
+      printf '%s\n' "$val"
       return 0
     fi
   done
@@ -109,7 +109,7 @@ kitbash.vars.load() {
       if [[ -n "$value" ]]; then
         log.debug "info.var: resolved '$name' via $resolver"
         __KITBASH_VAR_CACHE["$name"]="$value"
-        printf '%s' "$value"
+        printf '%s\n' "$value"
         return 0
       fi
     else

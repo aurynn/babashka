@@ -156,25 +156,25 @@ __kitbash_identify_init() {
   # systemd: both systemctl AND the runtime dir must exist
   if command -v systemctl >/dev/null 2>&1 \
      && [[ -d /run/systemd/system ]]; then
-    printf 'systemd'
+    printf 'systemd\n'
     return 0
   fi
   
   # OpenRC: rc-status exists and "supervise-daemon" exists
   if command -v rc-status >/dev/null 2>&1 \
      && command -v supervise-daemon >/dev/null 2>&1; then
-    printf 'openrc'
+    printf 'openrc\n'
     return 0
   fi
   
   # SysV fallback: presence of /etc/init.d and 'service'
   if command -v service >/dev/null 2>&1 \
      && [[ -d /etc/init.d ]]; then
-    printf 'sysv'
+    printf 'sysv\n'
     return 0
   fi
   # Otherwise we don't know
-  printf 'unknown'
+  printf 'unknown\n'
   return 1
 }
 

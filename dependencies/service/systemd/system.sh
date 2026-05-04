@@ -68,7 +68,7 @@ system.service.stop.systemd() {
   shift
   emit "$_unit"
   get_id() {
-    printf "%s" "$_unit"
+    printf "%s\n" "$_unit"
   }
   is_met() {
     systemctl is-active "$_unit" | grep -q "inactive"

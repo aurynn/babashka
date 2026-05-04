@@ -8,7 +8,7 @@ user.get_uid() {
   # Bypass logic
   # If we're a number, we don't need to be looked up
   if [[ "$user" =~ ^[0-9]+$ ]]; then
-    printf '%s' "$user"
+    printf '%s\n' "$user"
     return 0
   fi
   
@@ -21,7 +21,7 @@ user.get_uid() {
   local name passwd uid gid gecos home shell
   IFS=':' read -r name passwd uid gid gecos home shell <<< "$entry"
   
-  printf '%s' "$uid"
+  printf '%s\n' "$uid"
 }
 
 group.get_gid() {
@@ -33,7 +33,7 @@ group.get_gid() {
   # Bypass logic
   # If we're a number, we don't need to be looked up
   if [[ "$grp" =~ ^[0-9]+$ ]]; then
-    printf '%s' "$grp"
+    printf '%s\n' "$grp"
     return 0
   fi
   
@@ -44,6 +44,6 @@ group.get_gid() {
   }
   IFS=':' read -r name passwd gid members <<< "$entry"
   
-  printf '%s' "$gid"
+  printf '%s\n' "$gid"
 }
 
