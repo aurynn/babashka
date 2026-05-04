@@ -7,7 +7,7 @@ declare -Ag __KITBASH_SECRET_FILE_CACHE
 kitbash.vars.register_resolver kitbash.vars.files.lookup append
 # The variables init, since it assumes that it'll be caching.
 kitbash.vars.init.register kitbash.vars.files.init
-kitbash.secrets.init.register kitbash.vars.files.init
+kitbash.secrets.init.register kitbash.secrets.files.init
 # Load from secrets variables files
 kitbash.vars.secrets.register_resolver kitbash.vars.files.secret append
 

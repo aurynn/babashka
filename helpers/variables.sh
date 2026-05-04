@@ -212,4 +212,12 @@ kitbash.vars.init() {
   done
 }
 
+kitbash.secrets.init() {
+  local init
+  for init in "${__KITBASH_SECRET_RESOLVERS_INIT[@]}"; do
+    log.debug "Calling $init"
+    "$init"
+  done
+}
+
 kitbash.load variables/files.sh

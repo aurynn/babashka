@@ -776,6 +776,7 @@ __babashka_main() {
           __kitbash_load_model "$model"
           # Initialize the vars system
           kitbash.vars.init
+          kitbash.secrets.init
           log.debug "Applying all kits"
           kitbash.apply_kits || kitbash.fail "Failed to apply kits."
           log.debug "Applying model '$model'"
@@ -815,6 +816,7 @@ __babashka_main() {
           KITBASH_CURRENT_MODEL="$model"
           # Run init
           kitbash.vars.init
+          kitbash.secrets.init
           local m var v
           for m in "${KITBASH_ORDERED_MODELS[@]}"; do
             emit header $(str.color bold underline -- "Model: $m")
@@ -903,6 +905,7 @@ __babashka_main() {
         *)
           # Original path, so that we don't break prior functionality
           kitbash.vars.init
+          kitbash.secrets.init
           __babashka_invoke "$1"
           ;;
       esac
