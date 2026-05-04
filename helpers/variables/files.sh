@@ -284,7 +284,7 @@ __kitbash_parse_line() {
   
   regex_key="[A-Za-z_][A-Za-z0-9_]*"
   
-  regex_unquoted="^($regex_key)=([A-Za-z0-9_#%^*@]+)(\s#.*)*$"
+  regex_unquoted="^($regex_key)=([A-Za-z0-9_#%^*@\.]+)(\s#.*)*$"
   # regex_doublequoted="^([A-Za-z_][A-Za-z0-9_]*)=\"([^\"]*)\"$"
   regex_doublequoted='^([A-Za-z_][A-Za-z0-9_]*)="(([^"\\]|\\.)*)"$'
   regex_singlequoted="^([A-Za-z_][A-Za-z0-9_]*)='(([^'\\\\]|\\\\.)*)'$"

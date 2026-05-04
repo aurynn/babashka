@@ -46,6 +46,13 @@ teardown() {
   assert_equal "$KITBASH_KV_PARSE_VAL" "bar"
 }
 
+@test "__kitbash_parse_line works on lines with extended characters" {
+  __kitbash_parse_line "foo=asdf#%^*@."
+  
+  assert_equal "$KITBASH_KV_PARSE_KEY" "foo"
+  assert_equal "$KITBASH_KV_PARSE_VAL" "asdf#%^*@."
+}
+
 @test "__kitbash_parse_line unquoted lines allow #" {
   __kitbash_parse_line "foo=bar#baz"
   
