@@ -9,6 +9,8 @@ __babashka_dry_run=no
 # Default log level is notice
 KITBASH_LOG_LEVEL="${KITBASH_LOG_LEVEL:-4}"
 
+declare -g KITBASH_APPLIED
+
 declare -g KITBASH_MODELS_DIRECTORY_NAME="models.d"
 declare -ag KITBASH_VARIABLE_SUFFIXES
 KITBASH_VARIABLE_SUFFIXES=(
@@ -235,6 +237,8 @@ process() {
       KITBASH_CONTEXT="${FUNCNAME[1]} $__id"
     fi
     emit header "$KITBASH_CONTEXT"
+    # Set applied to false
+    KITBASH_APPLIED=$(false)
     __incr
     if ! process_is_met; then
       # Check if get_id is declared, so that we can log this in the 
@@ -252,7 +256,9 @@ process() {
       fi
       if [[ "$__babashka_dry_run" == "no" ]]; then
         
-        process_meet
+        process_meet || __babashka_fail "dependency didn't converge"
+        status="$?"
+        KITBASH_APPLIED=$(true)
         process_is_met || __babashka_fail "dependency didn't converge"
         declare -F finally > /dev/null 2>&1 && finally
       else
@@ -772,8 +778,10 @@ __babashka_main() {
         apply)
           # TODO
           # Support more than one model being applied
+          #   ... if that even makes sense
           model="$2"
           __kitbash_load_model "$model"
+          KITBASH_CURRENT_MODEL="$model"
           # Initialize the vars system
           kitbash.vars.init
           kitbash.secrets.init
@@ -849,7 +857,10 @@ __babashka_main() {
               emit info "No secrets..."
             else
               for var in $(kitbash.model "$m" secrets); do
-                if ! v=$(info.var.secret "$var"); then
+                v=$(info.var.secret "$var")
+                secret_status="$?"
+                if  (( "$secret_status" != "0" )); then
+                # if ! v=$(info.var.secret "$var"); then
                   emit error $(str.color bold bg-red -- "$var")
                 else
                   emit ok "$var:" $(str.color bold bg-white black -- "[REDACTED]")
