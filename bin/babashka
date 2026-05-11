@@ -238,7 +238,7 @@ process() {
     fi
     emit header "$KITBASH_CONTEXT"
     # Set applied to false
-    KITBASH_APPLIED=0
+    KITBASH_APPLIED=1
     __incr
     if ! process_is_met; then
       # Check if get_id is declared, so that we can log this in the 
@@ -258,7 +258,7 @@ process() {
         
         process_meet || __babashka_fail "dependency didn't converge"
         status="$?"
-        KITBASH_APPLIED=1
+        KITBASH_APPLIED=0
         process_is_met || __babashka_fail "dependency didn't converge"
         declare -F finally > /dev/null 2>&1 && finally
       else
