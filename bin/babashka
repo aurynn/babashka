@@ -139,6 +139,9 @@ __babashka_usage() {
 
 parse_main_args() {
   local opt OPTIND
+  local -n REMAINING_ARGS
+  REMAINING_ARGS="$1"
+  shift
   OPTIND=1
   while getopts "vfxsyd:" opt; do
       case $opt in
@@ -172,10 +175,10 @@ parse_main_args() {
               ;;
           \?)
               __babashka_usage
+              exit 0
               ;;
       esac
   done
-  
   ((shift_value = OPTIND - 1))
   shift $shift_value
   REMAINING_ARGS=("$@")
@@ -283,12 +286,19 @@ process() {
 process_is_met() {
     emit apply "is met?"
     __incr
-    is_met 
+    
+    ## So that anything emitted inside is incremented appropriately
+    __incr
+    is_met
     st="$?"
+    __decr
+    
+    ## Drop the decr, so we're back to normal indent level.
+    
     if [[ "$st" -eq 0 ]]; then
-      emit ok  "yes"
+      emit ok "yes"
     else
-      emit no  "no"
+      emit no "no"
     fi
     __decr
     # printf "  $st\n"
@@ -299,9 +309,15 @@ process_meet() {
   emit apply meet
     # prinf "=> meet "
   __incr
+  
+  ## So that anything emitted inside is incremented appropriately
+  __incr
   meet
   st="$?"
-  [[ "$st" -eq 0 ]] && emit ok met
+  ## Drop the decr, so we're back to normal indent level.
+  __decr
+  
+  [[ "$st" -eq 0 ]] && emit apply met
   __decr
   return "$st"
     # TODO:
@@ -744,8 +760,8 @@ __babashka_find_deps_from_path() {
 
 # so we can log before the main logging system gets initialized
 log.debug() {
-  (( "${KITBASH_LOG_LEVEL:-0}" == 0 )) || return
-  echo "$1" >&2
+  (( "${KITBASH_LOG_LEVEL:-0}" == 0 )) || return 0
+  printf '%s\n' "$1" >&2
 }
 
 # $1 - path to load deps from
@@ -765,16 +781,21 @@ __babashka_main() {
     #   overly much.
     # Why use a good argument parser when we can use a hacky argument
     # parser!
+    local -a post_parsed_args
+    parse_main_args post_parsed_args "$@"
     
-    parse_main_args "$@"
+    # Load provisioners here, since they might've been modified by the CLI
+    #   input.
+    __kitbash_load_provisioners
     
     if [ $__babashka_trace = "yes" ]; then
         set -x
     fi
-    
-    if (( "$#" >= 1 )); then
-      local model
-      case "$1" in
+    if (( "${#post_parsed_args[@]}" >= 1 )); then
+      local model cmd
+      cmd="${post_parsed_args[0]}"
+      log.debug "cmd is $cmd"
+      case "$cmd" in
         apply)
           # TODO
           # Support more than one model being applied
@@ -915,9 +936,20 @@ __babashka_main() {
           ;;
         *)
           # Original path, so that we don't break prior functionality
-          kitbash.vars.init
-          kitbash.secrets.init
-          __babashka_invoke "$1"
+          # If we're here, we have one of the original code paths, which means
+          #   $1 is going to be a command option value, which means we should
+          #   shift it off and look at $2.
+          # local _func
+          # case "$1" in
+          #   "-d")
+          #   _func="$3"
+          #   ;;
+          #   *)
+          #   _func="$2"
+          #   ;;
+          # esac
+          emit info "invoking $cmd"
+          __babashka_invoke "$cmd"
           ;;
       esac
     else
@@ -930,12 +962,15 @@ __babashka_main() {
 #   if they should load or not.
 
 
-# load our dependency tree, including our helpers
+# load our dependency tree
+# Don't load our provisioners here, since we might be modifying them via the
+#   -d command line argument, so that has to happen
 __kitbash_load_libraries
-__kitbash_load_provisioners
 
 # Converge. CONVERGE. COMPLY.
 
 if [[ ${BASH_SOURCE[0]} == "$0" ]]; then
   __babashka_main "$@"
+else
+  __kitbash_load_provisioners
 fi

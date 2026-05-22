@@ -35,7 +35,7 @@ system.package.absent.pacman() {
 
 # Don't define the main system.package functions unless we need to.
 
-system.info.like "arch" || return
+system.info.like "arch" || return 0
 
 system.package() {
   system.package.pacman "$@"

@@ -38,7 +38,7 @@ system.package.absent.brew() {
   process
 }
 
-system.info.like "macos" || return
+system.info.like "macos" || return 0
 
 system.package() {
   system.package.brew "$@"

@@ -18,8 +18,20 @@ system_disable() {
 }
 
 system_start_service() {
-  system.service.started nginx
+  system.service.start nginx
 }
+
 system_stop_service() {
-  system.service.stopped nginx
+  system.service.stop nginx
+}
+
+system_restart_service() {
+  system.service.restart nginx
+}
+system_reload_service() {
+  system.service.reload nginx
+}
+
+system_reload_or_restart_service() {
+  system.service.reload-or-restart nginx
 }
