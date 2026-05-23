@@ -267,14 +267,14 @@ __kitbash_parse_line() {
   # If we start with a comment, skip line.
   if [[ "${line::1}" == "#" ]]; then
     # Just return, since comments are skipped
-    return
+    return 1
   fi
   
   # Trim trailing whitespace as well, just to normalise things up
   line="${line%"${line##*[![:space:]]}"}"
   
   # If there's nothing left, we can skip the line
-  [[ -z "$line" ]] && return 0
+  [[ -z "$line" ]] && return 1
   
   # We have three types of valid k=v styles:
   # foo=bar_baz

@@ -28,8 +28,15 @@ teardown() {
 }
 
 @test "__kitbash_parse_line skips comment lines" {
-  __kitbash_parse_line "# foo=\"bar\""
-  # assert_success
+  run __kitbash_parse_line "# foo=\"bar\""
+  assert_failure
+  refute [ -n "$KITBASH_KV_PARSE_KEY" ]
+  refute [ -n "$KITBASH_KV_PARSE_VAL" ]
+}
+
+@test "__kitbash_parse_line skips empty lines" {
+  run __kitbash_parse_line ""
+  assert_failure
   refute [ -n "$KITBASH_KV_PARSE_KEY" ]
   refute [ -n "$KITBASH_KV_PARSE_VAL" ]
 }
