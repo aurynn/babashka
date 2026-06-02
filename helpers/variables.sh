@@ -52,7 +52,7 @@ info.var() {
   # 3. Default / error
   if [[ -n "$default" ]]; then
     log.debug "info.var: returning default for '$name'"
-    printf '%s\n' "$default"
+    printf '%s' "$default"
     return 0
   fi
 
