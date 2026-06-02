@@ -44,7 +44,7 @@ info.var() {
     #   sort of exception handler system eventually.
     # ... This project is growing its own OO-style environment. Oops.
     if [[ -n "$value" ]]; then
-      printf '%s\n' "$value"
+      printf '%s' "$value"
       return 0
     fi
   done
@@ -72,7 +72,7 @@ info.var.secret() {
     log.debug "Checking resolver '$resolver'"
     val=$("$resolver" "$name")
     if [[ -n "$val" ]]; then
-      printf '%s\n' "$val"
+      printf '%s' "$val"
       return 0
     fi
   done
