@@ -54,7 +54,7 @@ kitbash.vars.files.lookup() {
   log.debug "${__KITBASH_VAR_FILE_CACHE["$name"]}"
   # Requires Bash >=5.2
   if [[ -v __KITBASH_VAR_FILE_CACHE["$name"] ]]; then
-    printf '%s\n' "${__KITBASH_VAR_FILE_CACHE["$name"]}"
+    printf '%s' "${__KITBASH_VAR_FILE_CACHE["$name"]}"
     return
   fi
   return 1
@@ -203,7 +203,7 @@ kitbash.vars.files.secret() {
   log.debug "Searching for secret: '$name'"
   
   if [[ -v __KITBASH_SECRET_FILE_CACHE["$name"] ]]; then
-    printf '%s\n' "${__KITBASH_SECRET_FILE_CACHE["$name"]}"
+    printf '%s' "${__KITBASH_SECRET_FILE_CACHE["$name"]}"
     return
   fi
   emit error "No such secret '$name'"
@@ -284,7 +284,7 @@ __kitbash_parse_line() {
   
   regex_key="[A-Za-z_][A-Za-z0-9_]*"
   
-  regex_unquoted="^($regex_key)=([A-Za-z0-9_#%^*@\.]+)(\s#.*)*$"
+  regex_unquoted="^($regex_key)=([A-Za-z0-9_#%^*@\.\-\:\/\\]+)(\s#.*)*$"
   # regex_doublequoted="^([A-Za-z_][A-Za-z0-9_]*)=\"([^\"]*)\"$"
   regex_doublequoted='^([A-Za-z_][A-Za-z0-9_]*)="(([^"\\]|\\.)*)"$'
   regex_singlequoted="^([A-Za-z_][A-Za-z0-9_]*)='(([^'\\\\]|\\\\.)*)'$"
