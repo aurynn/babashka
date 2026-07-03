@@ -51,12 +51,12 @@ kitbash.vars.files.lookup() {
   name="$1"
   
   log.debug "Checking '$name'"
-  log.debug "${__KITBASH_VAR_FILE_CACHE["$name"]}"
   # Requires Bash >=5.2
   if [[ -v __KITBASH_VAR_FILE_CACHE["$name"] ]]; then
     printf '%s' "${__KITBASH_VAR_FILE_CACHE["$name"]}"
     return
   fi
+  log.debug "$name not found in var file cache"
   return 1
 }
 
