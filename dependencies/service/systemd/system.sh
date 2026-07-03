@@ -18,7 +18,7 @@ system.service.enable.systemd() {
     systemctl is-enabled "$_unit" 2>/dev/null | grep -q "enabled"
   }
   meet() {
-    systemctl enable "$_unit" 2>&1 > /dev/null;
+    systemctl enable "$_unit" > /dev/null 2>&1
   }
   process
 }
