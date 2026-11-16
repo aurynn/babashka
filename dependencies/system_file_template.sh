@@ -17,49 +17,41 @@ system.file.template() {
   # Declare the array that'll hold our values
   # local _vararray=()
   local -a sources
-  local -a vararray
-  while getopts "g:o:m:t:s:" opt; do
-    case "$opt" in
-      g)
-        local _group=$(echo $OPTARG | xargs);;
-      o)
-        local _owner=$(echo $OPTARG | xargs);;
-      m)
-        local _mode=$(echo $OPTARG | xargs);;
-      t)
-        local _template=$(echo $OPTARG | xargs);;
-      s)
-        # Set a variables file
-        # ... why is this -s and not -v ?
-        #     TODO: Allow it to fall through?
-        # Allows for multiple variable files to be used
-        
-        vararray+=( $OPTARG );;
-    esac
-  done
-  unset OPTIND
-  unset OPTARG
+  
+  
+  declare -A OPTIONS=(
+    ["-m|--mode;mode"]="0755"
+    ["-o|--owner;string"]="root"
+    ["-g|--group;string"]="root"
+    ["-t|--template;file"]=""
+    ["--open;string"]="{{"
+    ["--close;string"]="}}"
+  )
+  
+  local -A options
+  
+  std.argparser options "$@" || {
+    log.error "Could not parse options"
+    return 1
+  }
+  
+  local _group _owner _mode _template _open _close
+  
+  _owner="${options["--owner"]}"
+  _group="${options["--group"]}"
+  _mode="${options["--mode"]}"
+  _template="${options["--template"]}"
+  
+  _open="${options["--open"]}"
+  _close="${options["--close"]}"
+  
+  
   __babashka_log "== ${FUNCNAME[0]} $_file_name"
   # Ughhhhh this is wrong
   # Do I need a config file for this?
   if ! [[ -e /usr/bin/mo ]]; then
     __babashka_fail "${FUNCNAME[0]}: template renderer mo not installed."
   fi
-  if [[ -z "$_template" ]]; then
-    __babashka_fail "${FUNCNAME[0]}: template path must be set with -t."
-  fi
-  if ! [[ -e "$_template" ]]; then
-    __babashka_fail "${FUNCNAME[0]}: template $_template does not exist."
-    exit -1
-  fi
-  
-  local _variables=""
-  for var in "${vararray[@]}"; do 
-    if ! [[ -e "$var" ]]; then
-      __babashka_fail "${FUNCNAME[0]}: variable source file $var does not exist."
-    fi
-    sources+=("-s=$var")
-  done
   
   # Find all the Mo helpers so we can inject them as sources
   # Assumes, based on using the default installer, that any helpers
@@ -80,7 +72,7 @@ system.file.template() {
   done
   
   get_id() {
-    echo "${_file_name}"
+    printf "%s\n" "${_file_name}"
   }
   
   # Strip all unnecessary whitespace
@@ -88,12 +80,12 @@ system.file.template() {
   local contents status tmp
   local orig_umask
   orig_umask=$(umask)
-  log.debug mo -u -x --fail-on-file --allow-function-arguments "${sources[@]}" "$_template"
+  log.debug mo -u -x --open "$_open" --close "$_close" --fail-on-file --allow-function-arguments "${sources[@]}" "$_template"
   
   # Use `mo` instead of /usr/bin/mo so that it uses the sourced-in function
   # for Mo instead of trying to shell out. This is so that Mo has access to
   # our internal functions for info.var and info.var.secret.
-  mo_cmd=(mo -u -x --fail-on-function --fail-on-file --allow-function-arguments "${sources[@]}" "$_template")
+  mo_cmd=(mo -u -x --open "$_open" --close "$_close" --fail-on-function --fail-on-file --allow-function-arguments "${sources[@]}" "$_template")
   
   umask 077
   tmp=$(mktemp "$_file_name".tmpl.XXXXXXXX) || {

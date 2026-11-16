@@ -1,5 +1,12 @@
 ## Provides a typechecker, for use with std.argparser
-
+## Currently provides:
+## - str|string
+## - int|integer
+## - bool|boolean
+## - mode
+## - file
+## - path (uses pathchk)
+## - ipaddr (ipv4 only)
 std.typecheck() {
   local type="$1"
   local value="$2"
@@ -53,7 +60,7 @@ std.typecheck() {
       fi
       return 1
       ;;
-    ipaddr)
+    ipaddr|ipv4)
       # should match valid IPv4 addresses
       segment="[1-2]{1}[0-9]{1}[0-9]{1}|[1-2]{1}[0-9]{1}|[1-2]{1}"
       if [[ "$value" =~ ^$segment\.$segment\.$segment\.$segment ]]; then
@@ -63,13 +70,17 @@ std.typecheck() {
       # otherwise, attempt to match valid ipv6 addresses?
       ;;
     # TODO
-    # Add semver
+    # - semver
+    # - ipv6
     *)
       # If type is unknown, return an error
       echo "Unknown type: $type"
       return 1
       ;;
   esac
+  
+  ## todo:
+  ## Provide a 
   
   return 0
 }
