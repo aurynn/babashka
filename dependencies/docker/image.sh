@@ -27,7 +27,7 @@ docker.image() {
     fi
     emit info "Fetching local SHA"
     # LOCAL_SHA=$(/usr/bin/docker inspect --format '{{.Id}}' " 2> /dev/null)
-    LOCAL_SHA=$(/usr/bin/docker inspect "$image" 2> /dev/null | jq '.[0].RepoDigests[-1]' | awk -F '@' '{print $2}')
+    LOCAL_SHA=$(/usr/bin/docker inspect "$image" 2> /dev/null | jq -r '.[0].RepoDigests[-1]' | awk -F '@' '{print $2}')
     emit info "Fetching remote SHA"
     REMOTE_SHA=$(/usr/bin/skopeo inspect --format '{{.Digest}}' docker://"$image" 2> /dev/null)
     
