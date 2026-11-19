@@ -80,12 +80,12 @@ system.file.template() {
   local contents status tmp
   local orig_umask
   orig_umask=$(umask)
-  log.debug mo -u -x --open "$_open" --close "$_close" --fail-on-file --allow-function-arguments "${sources[@]}" "$_template"
+  log.debug mo -u -o="$_open" -c="$_close" --fail-on-function --fail-on-file --allow-function-arguments "$_template"
   
   # Use `mo` instead of /usr/bin/mo so that it uses the sourced-in function
   # for Mo instead of trying to shell out. This is so that Mo has access to
   # our internal functions for info.var and info.var.secret.
-  mo_cmd=(mo -u -x --open "$_open" --close "$_close" --fail-on-function --fail-on-file --allow-function-arguments "${sources[@]}" "$_template")
+  mo_cmd=(mo -u -o="$_open" -c="$_close" --fail-on-function --fail-on-file --allow-function-arguments "$_template")
   
   umask 077
   tmp=$(mktemp "$_file_name".tmpl.XXXXXXXX) || {
